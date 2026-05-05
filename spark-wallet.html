@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark Wallet</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f0f0f;
+    color: #e8e8e8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #f7931a;
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+  }
+
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  .card-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  .card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .card-title-row .card-title { margin-bottom: 0; }
+  .badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #f0b061;
+    background: #24170a;
+    border: 1px solid #5b3a10;
+    padding: 4px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .muted { color: #666; font-size: 0.78rem; }
+
+  input[type="text"], input[type="password"], input[type="number"] {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #e8e8e8;
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: #f7931a; }
+
+  button {
+    width: 100%;
+    background: #f7931a;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 11px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .address-box {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    word-break: break-all;
+    color: #aaa;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .address-box:hover { border-color: #f7931a; color: #e8e8e8; }
+
+  .balance-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f7931a;
+    margin-bottom: 4px;
+  }
+  .balance-sub {
+    font-size: 0.85rem;
+    color: #555;
+  }
+
+  .qr-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  #qr canvas { border-radius: 8px; }
+
+  .status {
+    font-size: 0.82rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 12px;
+    display: none;
+  }
+  .status.ok  { background: #0d2e12; color: #4caf50; border: 1px solid #1e5c24; display: block; }
+  .status.err { background: #2e0d0d; color: #f44336; border: 1px solid #5c1e1e; display: block; }
+  .status.info { background: #1a1a0d; color: #f7931a; border: 1px solid #4a3a00; display: block; }
+
+  .row { display: flex; gap: 8px; }
+  .row button { flex: 1; }
+  .copy-btn { background: #222; color: #aaa; font-weight: 500; }
+  .copy-btn:hover { background: #2a2a2a; opacity: 1; }
+
+  #connect-card { width: 100%; max-width: 520px; }
+  #wallet-section { display: none; width: 100%; max-width: 1080px; }
+  .wallet-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .wallet-grid .card { margin-bottom: 0; }
+  .card-wide { grid-column: 1 / -1; }
+
+  .refresh-btn {
+    background: transparent;
+    color: #555;
+    font-size: 0.78rem;
+    font-weight: 500;
+    border: 1px solid #333;
+    padding: 6px 12px;
+    border-radius: 6px;
+    width: auto;
+    margin-top: 12px;
+  }
+  .refresh-btn:hover { color: #aaa; opacity: 1; border-color: #555; }
+  .pager-btn { margin-top: 0; width: 84px; }
+
+  .tx-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .tx-item {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .tx-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .tx-id { font-size: 0.72rem; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+  .tx-meta { font-size: 0.78rem; color: #888; }
+  .tx-amount { font-size: 0.95rem; font-weight: 700; white-space: nowrap; }
+  .tx-amount.in  { color: #4caf50; }
+  .tx-amount.out { color: #f44336; }
+  .tx-empty { font-size: 0.82rem; color: #555; text-align: center; padding: 16px 0; }
+  .tx-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .tx-page-label { font-size: 0.78rem; color: #666; flex: 1; text-align: center; }
+  .balance-result { margin-top: 12px; }
+  .balance-meta { font-size: 0.78rem; color: #666; }
+  @media (max-width: 900px) {
+    .wallet-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>⚡ Spark Wallet</h1>
+
+<!-- Connect card -->
+<div class="card" id="connect-card">
+  <div class="card-title-row">
+    <div class="card-title">Connect</div>
+    <div class="badge">Secure</div>
+  </div>
+  <select id="network" style="width:100%;background:#111;border:1px solid #333;border-radius:8px;color:#e8e8e8;font-size:0.9rem;padding:10px 14px;outline:none;margin-bottom:12px;cursor:pointer;">
+    <option value="MAINNET">Mainnet (spark1...)</option>
+    <option value="REGTEST" selected>Regtest (sparkrt1...)</option>
+  </select>
+  <input type="password" id="mnemonic" placeholder="Enter your 12-word mnemonic phrase" />
+  <button id="connect-btn" onclick="connect()">Connect Wallet</button>
+  <div class="status" id="connect-status"></div>
+</div>
+
+<!-- Wallet section (hidden until connected) -->
+<div id="wallet-section">
+  <div class="wallet-grid">
+
+  <!-- Receive card -->
+  <div class="card">
+    <div class="card-title-row">
+      <div class="card-title">Receive</div>
+      <div class="badge">Address</div>
+    </div>
+    <div class="qr-wrap"><div id="qr"></div></div>
+    <div class="address-box" id="address-display" onclick="copyAddress()" title="Click to copy">
+      —
+    </div>
+    <div class="row">
+      <button class="copy-btn" onclick="copyAddress()">Copy Address</button>
+    </div>
+    <div class="status" id="copy-status"></div>
+  </div>
+
+  <!-- Balance card -->
+  <div class="card">
+    <div class="card-title-row">
+      <div class="card-title">Balance</div>
+      <div class="badge">Auto-refresh 5s</div>
+    </div>
+    <div class="balance-amount" id="balance-sats">—</div>
+    <div class="balance-sub" id="balance-btc"></div>
+    <button class="refresh-btn" onclick="refreshBalance()">Refresh now</button>
+    <div class="status" id="balance-status"></div>
+  </div>
+
+  <!-- Address balance card -->
+  <div class="card">
+    <div class="card-title-row">
+      <div class="card-title">Check Balance (Spark Address)</div>
+      <div class="badge">Public</div>
+    </div>
+    <input type="text" id="check-address" placeholder="Enter Spark address (spark1... or sparkrt1...)" />
+    <button id="check-btn" onclick="checkAddressBalance()">Check Balance</button>
+    <div class="balance-result">
+      <div class="balance-amount" id="check-balance-sats">—</div>
+      <div class="balance-sub" id="check-balance-btc"></div>
+      <div class="balance-meta" id="check-balance-network"></div>
+    </div>
+    <div class="status" id="check-status"></div>
+  </div>
+
+  <!-- Send card -->
+  <div class="card">
+    <div class="card-title-row">
+      <div class="card-title">Send</div>
+      <div class="badge">Transfer</div>
+    </div>
+    <input type="text"   id="send-to"   placeholder="Recipient Spark address (spark1... or sparkrt1...)" />
+    <input type="number" id="send-sats" placeholder="Amount in satoshis" min="1" />
+    <button id="send-btn" onclick="send()">Send</button>
+    <div class="status" id="send-status"></div>
+  </div>
+
+  <!-- History card -->
+  <div class="card card-wide">
+    <div class="card-title-row">
+      <div class="card-title">Transaction History</div>
+      <div class="badge">Auto-refresh 5s</div>
+    </div>
+    <div class="tx-list" id="tx-list"><div class="tx-empty">No transactions yet.</div></div>
+    <div class="tx-pagination">
+      <button class="refresh-btn pager-btn" id="tx-prev" onclick="loadPrevTx()" disabled>Prev</button>
+      <div class="tx-page-label" id="tx-page">Page 1</div>
+      <button class="refresh-btn pager-btn" id="tx-next" onclick="loadNextTx()" disabled>Next</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="refresh-btn" onclick="loadTx({ reset: true })">Refresh now</button>
+    </div>
+    <div class="status" id="tx-status"></div>
+  </div>
+
+  </div>
+</div>
+
+  <script>
+  const API = 'http://localhost:3000';
+  const REQUEST_TIMEOUT_MS = 10000;
+  let sparkAddress = null;
+  let txPage = 0;
+  let txOffsets = [0];
+  let txHasNext = false;
+  let autoRefreshTimer = null;
+  let walletRefreshInFlight = false;
+  let currentBalanceSats = null;
+  const TX_PAGE = 20;
+
+  async function fetchJson(path, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(`${API}${path}`, { ...options, signal: controller.signal });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function showStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = `status ${type}`;
+  }
+
+  function showWallet(address) {
+    sparkAddress = address;
+    currentBalanceSats = null;
+    document.getElementById('address-display').textContent = sparkAddress;
+    document.getElementById('connect-card').style.display = 'none';
+    document.getElementById('wallet-section').style.display = 'block';
+    document.getElementById('balance-sats').textContent = 'Loading…';
+    document.getElementById('balance-btc').textContent = '';
+    document.getElementById('tx-list').innerHTML = '<div class="tx-empty">Loading transactions…</div>';
+    QRCode.toCanvas(document.createElement('canvas'), sparkAddress, { width: 180, margin: 1, color: { dark: '#f7931a', light: '#111' } }, (err, canvas) => {
+      if (!err) { const wrap = document.getElementById('qr'); wrap.innerHTML = ''; wrap.appendChild(canvas); }
+    });
+  }
+
+  async function connect() {
+    const mnemonic = document.getElementById('mnemonic').value.trim();
+    if (!mnemonic) return showStatus('connect-status', 'Enter your mnemonic.', 'err');
+
+    const btn = document.getElementById('connect-btn');
+    btn.disabled = true;
+    btn.textContent = 'Connecting…';
+    showStatus('connect-status', 'Connecting to Spark network…', 'info');
+
+    try {
+      const network = document.getElementById('network').value;
+      const data = await fetchJson('/api/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mnemonic, network })
+      });
+
+      showWallet(data.address);
+      txPage = 0;
+      txOffsets = [0];
+      txHasNext = false;
+      startAutoRefresh();
+    } catch (e) {
+      showStatus('connect-status', `Error: ${e.message}`, 'err');
+      btn.disabled = false;
+      btn.textContent = 'Connect Wallet';
+    }
+  }
+
+  async function refreshBalance(silent = false) {
+    if (!silent) showStatus('balance-status', 'Fetching balance…', 'info');
+    try {
+      const data = await fetchJson('/api/balance');
+
+      const sats = BigInt(data.sats);
+      currentBalanceSats = sats;
+      document.getElementById('balance-sats').textContent = `${sats.toLocaleString()} sats`;
+      document.getElementById('balance-btc').textContent = `${(Number(sats) / 1e8).toFixed(8)} BTC`;
+      if (!silent) showStatus('balance-status', 'Updated just now.', 'ok');
+      return true;
+    } catch (e) {
+      if (currentBalanceSats === null) {
+        document.getElementById('balance-sats').textContent = '—';
+        document.getElementById('balance-btc').textContent = '';
+      }
+      showStatus('balance-status', `Error: ${e.message}`, 'err');
+      return false;
+    }
+  }
+
+  async function send() {
+    const to   = document.getElementById('send-to').value.trim();
+    const sats = document.getElementById('send-sats').value.trim();
+    if (!to)   return showStatus('send-status', 'Enter a recipient address.', 'err');
+    if (!sats) return showStatus('send-status', 'Enter an amount.', 'err');
+    if (!/^\d+$/.test(sats)) return showStatus('send-status', 'Amount must be a whole number in sats.', 'err');
+
+    const amount = BigInt(sats);
+    if (amount <= 0n) return showStatus('send-status', 'Amount must be greater than 0.', 'err');
+
+    if (currentBalanceSats === null) {
+      await refreshBalance(true);
+    }
+    if (currentBalanceSats !== null && amount > currentBalanceSats) {
+      return showStatus(
+        'send-status',
+        `Insufficient balance. Available: ${currentBalanceSats.toLocaleString()} sats.`,
+        'err'
+      );
+    }
+
+    const btn = document.getElementById('send-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    showStatus('send-status', `Sending ${sats} sats…`, 'info');
+
+    try {
+      const res = await fetch(`${API}/api/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, sats })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      showStatus('send-status', `Sent! TX: ${data.txId}`, 'ok');
+      document.getElementById('send-to').value = '';
+      document.getElementById('send-sats').value = '';
+      await refreshBalance();
+      await loadTx({ reset: true });
+    } catch (e) {
+      const msg = String(e.message || '');
+      if (msg.includes('exceeds available balance')) {
+        const available = currentBalanceSats === null ? 'unknown' : `${currentBalanceSats.toLocaleString()} sats`;
+        showStatus('send-status', `Insufficient balance. Available: ${available}.`, 'err');
+      } else {
+        showStatus('send-status', `Error: ${e.message}`, 'err');
+      }
+      await refreshBalance(true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send';
+    }
+  }
+
+  function renderTxItem(tx) {
+    const dir = tx.direction === 'INCOMING' ? 'in' : 'out';
+    const sign = dir === 'in' ? '+' : '−';
+    const label = dir === 'in' ? 'Received' : 'Sent';
+    const date = tx.createdAt ? new Date(tx.createdAt).toLocaleString() : '—';
+    const shortId = tx.id ? tx.id.slice(0, 12) + '…' : '—';
+    const sats = Number(tx.sats).toLocaleString();
+    return `
+      <div class="tx-item">
+        <div class="tx-left">
+          <span class="tx-meta">${label} &middot; ${date}</span>
+          <span class="tx-id" title="${tx.id}">${shortId}</span>
+        </div>
+        <span class="tx-amount ${dir}">${sign}${sats} sats</span>
+      </div>`;
+  }
+
+  async function loadTx({ page = txPage, reset = false, silent = false } = {}) {
+    if (reset) {
+      txPage = 0;
+      txOffsets = [0];
+      page = 0;
+    }
+    const offset = txOffsets[page] ?? 0;
+    if (!silent) showStatus('tx-status', 'Loading…', 'info');
+    try {
+      const data = await fetchJson(`/api/transfers?limit=${TX_PAGE}&offset=${offset}`);
+
+      const list = document.getElementById('tx-list');
+      if (data.transfers.length === 0) {
+        list.innerHTML = page === 0
+          ? '<div class="tx-empty">No transactions yet.</div>'
+          : '<div class="tx-empty">No more transactions.</div>';
+      } else {
+        list.innerHTML = data.transfers.map(renderTxItem).join('');
+      }
+
+      txPage = page;
+      txOffsets[page + 1] = data.offset;
+      txHasNext = data.transfers.length === TX_PAGE;
+      updateTxPagination();
+      if (!silent) document.getElementById('tx-status').className = 'status';
+      return true;
+    } catch (e) {
+      showStatus('tx-status', `Error: ${e.message}`, 'err');
+      return false;
+    }
+  }
+
+  async function refreshWalletData({ silent = false, reset = false } = {}) {
+    if (walletRefreshInFlight) return;
+    walletRefreshInFlight = true;
+    try {
+      await Promise.all([
+        refreshBalance(silent),
+        loadTx({ page: txPage, reset, silent })
+      ]);
+    } finally {
+      walletRefreshInFlight = false;
+    }
+  }
+
+  function updateTxPagination() {
+    document.getElementById('tx-page').textContent = `Page ${txPage + 1}`;
+    document.getElementById('tx-prev').disabled = txPage === 0;
+    document.getElementById('tx-next').disabled = !txHasNext;
+  }
+
+  function loadNextTx() {
+    if (!txHasNext) return;
+    loadTx({ page: txPage + 1 });
+  }
+
+  function loadPrevTx() {
+    if (txPage === 0) return;
+    loadTx({ page: txPage - 1 });
+  }
+
+  function startAutoRefresh() {
+    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    refreshWalletData({ silent: false, reset: true });
+    autoRefreshTimer = setInterval(() => {
+      refreshWalletData({ silent: true });
+    }, 5000);
+  }
+
+  async function init() {
+    updateTxPagination();
+    try {
+      const data = await fetchJson('/api/status');
+      if (!data.connected) return;
+
+      showWallet(data.address);
+      txPage = 0;
+      txOffsets = [0];
+      txHasNext = false;
+      startAutoRefresh();
+    } catch (e) {
+      showStatus('connect-status', `Status check failed: ${e.message}`, 'err');
+    }
+  }
+
+  async function checkAddressBalance() {
+    const address = document.getElementById('check-address').value.trim();
+    if (!address) return showStatus('check-status', 'Enter a Spark address.', 'err');
+
+    const btn = document.getElementById('check-btn');
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+    showStatus('check-status', 'Fetching balance…', 'info');
+
+    try {
+      const data = await fetchJson(`/api/address-balance?address=${encodeURIComponent(address)}`);
+
+      const sats = BigInt(data.sats);
+      document.getElementById('check-balance-sats').textContent = `${sats.toLocaleString()} sats`;
+      document.getElementById('check-balance-btc').textContent = `${(Number(sats) / 1e8).toFixed(8)} BTC`;
+      document.getElementById('check-balance-network').textContent = `Network: ${data.network}`;
+      showStatus('check-status', 'Balance fetched.', 'ok');
+    } catch (e) {
+      const message = e.name === 'AbortError' ? 'Request timed out. Try again.' : e.message;
+      showStatus('check-status', `Error: ${message}`, 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Check Balance';
+    }
+  }
+
+  function copyAddress() {
+    if (!sparkAddress) return;
+    navigator.clipboard.writeText(sparkAddress).then(() => {
+      showStatus('copy-status', 'Address copied to clipboard.', 'ok');
+      setTimeout(() => document.getElementById('copy-status').className = 'status', 2000);
+    });
+  }
+
+  // Allow Enter key on mnemonic field
+  document.getElementById('mnemonic').addEventListener('keydown', e => {
+    if (e.key === 'Enter') connect();
+  });
+  document.getElementById('check-address').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkAddressBalance();
+  });
+  init();
+</script>
+</body>
+</html>
