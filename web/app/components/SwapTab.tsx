@@ -152,57 +152,16 @@ export default function SwapTab() {
   const quoteRequestId = useRef(0);
   const prevFromAssetRef = useRef<string | null>(null);
 
-  const loadAssets = useCallback(async (cfg: SwapConfig) => {
-    if (!cfg.baseUrl) return;
-    setAssetsLoading(true);
-    try {
-      const [assetsRes, liqRes] = await Promise.all([
-        fetch(`/api/swap/assets?baseUrl=${encodeURIComponent(cfg.baseUrl)}`),
-        fetch(`/api/swap/liquidity?baseUrl=${encodeURIComponent(cfg.baseUrl)}`),
-      ]);
+  const STATIC_ASSETS: Asset[] = [
+    { id: "spark_regtest:btc",     chain: "spark_regtest",    minAmount: "5",  decimals: 8 },
+    { id: "arbitrum_sepolia:wbtc", chain: "arbitrum_sepolia", minAmount: "5",  decimals: 8 },
+    { id: "arbitrum_sepolia:eth",  chain: "arbitrum_sepolia", minAmount: "100", decimals: 18 },
+  ];
 
-      const assetsData = await assetsRes.json();
-      const liqData = await liqRes.json();
-
-      if (!assetsRes.ok) throw new Error(assetsData.error);
-      
-      const rawAssets: Asset[] = assetsData.assets ?? [];
-      
-      // Correctly parse the array-based liquidity response
-      // The structure is { status: "Ok", result: [ { solver_id: "...", liquidity: [...] }, ... ] }
-      const solvers = liqData.result ?? (Array.isArray(liqData) ? liqData : []);
-      const devSolver = solvers.find((s: any) => s.solver_id === "devsolver");
-      const devLiquidity = devSolver?.liquidity ?? [];
-      
-      // Map asset IDs to their balances for the devsolver
-      const liqMap: Record<string, string | number> = {};
-      devLiquidity.forEach((item: any) => {
-        if (item.asset) liqMap[item.asset] = item.balance;
-      });
-      
-      // Filter assets: must have a non-zero balance for the devsolver
-      const list = rawAssets.filter(a => {
-        const val = liqMap[a.id];
-        return val !== undefined && BigInt(val) > 0n;
-      });
-
-      setAssets(list);
-      
-      const defaultFrom = "spark_regtest:btc";
-      const defaultTo = "arbitrum_sepolia:wbtc";
-
-      setFromAsset(p => {
-        if (p && list.find(a => a.id === p)) return p;
-        const found = list.find(a => a.id.toLowerCase() === defaultFrom);
-        return found ? found.id : (list[0]?.id || "");
-      });
-      setToAsset(p => {
-        if (p && list.find(a => a.id === p)) return p;
-        const found = list.find(a => a.id.toLowerCase() === defaultTo);
-        return found ? found.id : (list[1]?.id || list[0]?.id || "");
-      });
-    } catch { /* ignore */ }
-    finally { setAssetsLoading(false); }
+  const loadAssets = useCallback((_cfg: SwapConfig) => {
+    setAssets(STATIC_ASSETS);
+    setFromAsset(p => (p && STATIC_ASSETS.find(a => a.id === p)) ? p : "spark_regtest:btc");
+    setToAsset(p  => (p && STATIC_ASSETS.find(a => a.id === p)) ? p : "arbitrum_sepolia:wbtc");
   }, []);
 
   useEffect(() => {
