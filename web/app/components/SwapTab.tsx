@@ -261,7 +261,11 @@ export default function SwapTab() {
   const toInfo = useMemo(() => assets.find(a => a.id===toAsset), [assets,toAsset]);
   const sparkRequired = useMemo(() => fromAsset.startsWith("spark") || toAsset.startsWith("spark"), [fromAsset, toAsset]);
   const sparkAddressTrimmed = config.sparkAddress.trim();
-  const sparkAddressValid = useMemo(() => !sparkRequired || (sparkAddressTrimmed && isValidSparkAddress(sparkAddressTrimmed)), [sparkRequired, sparkAddressTrimmed]);
+  const sparkAddressValid = useMemo(() => {
+    if (!sparkRequired) return true; // Spark not required, so it's valid
+    if (!sparkAddressTrimmed) return false; // Spark required but not set
+    return isValidSparkAddress(sparkAddressTrimmed); // Validate if set
+  }, [sparkRequired, sparkAddressTrimmed]);
 
   // Convert a human decimal string ("0.00000005") into integer base units ("5") using `decimals`.
   function toBaseUnits(decimal: string, decimals: number): string {
