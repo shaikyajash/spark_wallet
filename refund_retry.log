@@ -1,0 +1,23 @@
+◇ injected env (17) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+== Refunding expired Spark→EVM orders ==
+Connecting Spark wallet…
+wallet: sparkrt1pgssyjnc4p35n5ew2ah0h9w5z9me20x60l585xeujgunx2qfs0cznkw2r5pwv7
+
+Fetching expired orders…
+Fetched 89 expired Spark-source orders.
+Targets: 8 (skipped: 81)
+[001/8] OK order=5558f3dd989e2b0179045b52285cdebb5520232c85b10b09b44add99acd71741 amt=9 tx=019e3fcd-3396-7605-a0da-dc1c0818428c took=1184ms
+[002/8] OK order=571b5764e9e9f16b1c7cb21acb7fecec4e2f9bf136775e5e7420fcb33cb70370 amt=2 tx=019e3fcd-3834-7516-a86e-048a3c06f6fe took=747ms
+[003/8] OK order=7ecc467841f0e87db459548bb839b8338ee3e9fce57376e99ba2f7b467304826 amt=2 tx=019e3fcd-3b20-7e9e-8d54-558ba8b10853 took=822ms
+[004/8] OK order=f68383c3a7d169c53513af37d28b93f084a25530cf5f1dfc353074f29fa97cfc amt=9 tx=019e3fcd-3e57-7397-880e-94f140dc6cf0 took=1047ms
+[005/8] OK order=2a8e266934c59b76ec29f529b35d8aa72d6bea816d6a110c0d9de89bfef8ac0c amt=6 tx=019e3fcd-58fc-7096-b088-38a7e21e9ffd took=6615ms
+[006/8] OK order=c31f4baaeff938837df87c5e547d7ea09299b04c261fd85a0dba9fefc9cf6ea1 amt=6 tx=019e3fcd-5c47-7359-8462-ca9b978c61e2 took=842ms
+[007/8] OK order=120d04e88c0c794c8800b03ca6a9c733eb8ef0d73b1f1d96f8eef23728d16377 amt=10 tx=019e3fcd-5f8e-7872-8612-6c76a199c9cf took=802ms
+[008/8] OK order=ea434bada806e2f6b4dcd2124dbde2457c02b9a32afd00200d7aba294b4a0ae8 amt=6 tx=019e3fcd-62b0-78ff-9a70-24cc94463653 took=852ms
+
+=== Summary ===
+fetched:  89
+skipped:  81
+ok:       8
+err:      0
+wall:     12.9s

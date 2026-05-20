@@ -1,9 +1,15 @@
-import { getWallet } from "@/lib/wallet-store";
+import { SparkWallet } from "@buildonspark/spark-sdk";
+import { getSession } from "@/lib/session";
 
 export async function GET(req: Request) {
-  const wallet = getWallet();
-  if (!wallet) return Response.json({ error: "Not connected" }, { status: 401 });
+  const session = await getSession();
+  if (!session) return Response.json({ error: "Not connected" }, { status: 401 });
+
   try {
+    const { wallet } = await SparkWallet.initialize({
+      mnemonicOrSeed: session.mnemonic,
+      options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
+    });
     const { searchParams } = new URL(req.url);
     const limit = Number(searchParams.get("limit") ?? 20);
     const offset = Number(searchParams.get("offset") ?? 0);

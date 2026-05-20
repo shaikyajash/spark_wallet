@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@buildonspark/spark-sdk": "^0.7.14",
-    "bip39": "^3.1.0"
+    "bip39": "^3.1.0",
+    "dotenv": "^17.4.2"
   }
 }

@@ -1,5 +1,5 @@
 import { SparkWallet } from "@buildonspark/spark-sdk";
-import { setWallet } from "@/lib/wallet-store";
+import { setSession } from "@/lib/session";
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const net = (network || "REGTEST").toUpperCase();
     const { wallet } = await SparkWallet.initialize({ mnemonicOrSeed: mnemonic.trim(), options: { network: net } });
     const address = await wallet.getSparkAddress();
-    setWallet(wallet, address, net);
+    await setSession(mnemonic.trim(), address, net);
     return Response.json({ address, network: net });
   } catch (e: unknown) {
     return Response.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });

@@ -1,0 +1,184 @@
+◇ injected env (17) from .env // tip: ⌘ suppress logs { quiet: true }
+== Spark→Arb: 400 swaps in 8 batches of 50 × 5 sats ==
+from owner: sparkrt1pgssyjnc4p35n5ew2ah0h9w5z9me20x60l585xeujgunx2qfs0cznkw2r5pwv7
+dest owner: 0x7801aE8881A59F231fA31D7a5b56cb20766fd2eB
+
+Connecting Spark wallet…
+wallet address: sparkrt1pgssyjnc4p35n5ew2ah0h9w5z9me20x60l585xeujgunx2qfs0cznkw2r5pwv7
+
+############ Batch 1/8  (50 swaps) ############
+
+=== Phase 1: creating 50 orders (concurrency=10) ===
+[b1 order 05/50] OK order=c787908cf43861c717ca0581d7101e612bec7958c8c1f5ba026306802dfd594f to=sparkrt1pgss92fkfhuygcu2… amt=5 took=235ms
+[b1 order 08/50] OK order=04e92d6e557dbdd295d81770d0459fe37971aef84d11cdf94dc9194c9d7247d6 to=sparkrt1pgss84rwfx222x8h… amt=5 took=234ms
+[b1 order 10/50] OK order=34d83391e0af6024cfb636d16a5d73472c3afe45d649e24b1cdcef76d362954d to=sparkrt1pgssykvqvx3nt7j9… amt=5 took=236ms
+[b1 order 03/50] OK order=8b84df8e16d8e0330f26df2756ce0fab03301c3b9acadd2957a9b81b9ae9174e to=sparkrt1pgss8amk3t3sxpdc… amt=5 took=237ms
+[b1 order 02/50] OK order=2fb7ce53d734a355489150bf52888107e6ae4ead56e42b314b3adf38d35703db to=sparkrt1pgssy6qe6t8y4cck… amt=5 took=244ms
+[b1 order 04/50] OK order=7b274f7ab198f25cf7acbe545407c08ba4d7eae4c6396b8dc5d5e08620a4f528 to=sparkrt1pgssxxl39zg5p6wp… amt=5 took=243ms
+[b1 order 01/50] OK order=d5693451d59081db14663ae0308a974d4f973c75a7aff31cdf022e64ce2994eb to=sparkrt1pgss97kvcy936d44… amt=5 took=248ms
+[b1 order 06/50] OK order=20d6b149affeb1ab0bb6aed0ae909c6915da12719a8401e094d62609646eab9b to=sparkrt1pgssy9tec0xvtkjc… amt=5 took=244ms
+[b1 order 07/50] OK order=eba3720fa55b672c236c573eb151d7705cc74ef0e8fba7af2efd86ade0931d6d to=sparkrt1pgssyw0skfqnueq4… amt=5 took=247ms
+[b1 order 09/50] OK order=417b91795f840003316fb6c0516d0e7e52d73580fa692746ea54c29a64eeec22 to=sparkrt1pgss8r64zrk8cfr8… amt=5 took=252ms
+[b1 order 11/50] OK order=ff83f0b81ea3b4e5f5de411bcf4bb7a11f704e0d4d6a82ae9d3dd2bcb9d08db0 to=sparkrt1pgss9vdcx4mqwrc7… amt=5 took=132ms
+[b1 order 17/50] OK order=120d04e88c0c794c8800b03ca6a9c733eb8ef0d73b1f1d96f8eef23728d16377 to=sparkrt1pgss9jhvlerc6y45… amt=5 took=142ms
+[b1 order 14/50] OK order=935b387bdaabfe0b4354338287a36af14b82da76d2786fa09795b21a33ac0ae7 to=sparkrt1pgss84fzkzdvgddl… amt=5 took=151ms
+[b1 order 12/50] OK order=255703ae690a1beddfd37c2c1617e070086612104b91e87ed8f573583a66592b to=sparkrt1pgssyv2k79p2lqwj… amt=5 took=174ms
+[b1 order 13/50] OK order=fdaf5d52dcfed14e02beb61a4fa38ea3f77329f80ac1cdf49151abf596a1a67a to=sparkrt1pgssy8rlawc4ey2m… amt=5 took=172ms
+[b1 order 16/50] OK order=ddd94e71939eb8b277e71aff78fece4781bbefebaa9afa03db26f2d140b18871 to=sparkrt1pgss8rkkdftss02x… amt=5 took=166ms
+[b1 order 20/50] OK order=2ff7ae1319d6a5e9819ee409c88dcc780963251a764afc6291e551d386d48167 to=sparkrt1pgss9zxgq4cr8cqr… amt=5 took=157ms
+[b1 order 19/50] OK order=992a4374bfd861a925b40cb5b0e5e9f680aaa88b10872ce8a3bda328e20c17b0 to=sparkrt1pgss9f7xtd9sj572… amt=5 took=163ms
+[b1 order 18/50] OK order=95b9d1a10e1d81bce8a6d07ee52da74063ce7727dbe8d4a639d0f0515d71603b to=sparkrt1pgssy89efwlxva7d… amt=5 took=166ms
+[b1 order 15/50] OK order=7986f636350980d184cfdce8b7928e0cf67001239f87173a277f77bba0fa21f4 to=sparkrt1pgssyktgptzdxm55… amt=5 took=167ms
+[b1 order 21/50] OK order=228dbdb8fe366ba6456892723fbbd21a835c963dccf134c6a43bde354c33be2a to=sparkrt1pgss82jkvxupd3n7… amt=5 took=113ms
+[b1 order 23/50] OK order=5d888dcf75ef7287d5ccd68e7fcb6e6cb3c1cdbd91e2d21500763b98d65f196a to=sparkrt1pgssxjpauq4ppwk7… amt=5 took=121ms
+[b1 order 22/50] OK order=ef523c7a7832d7a4e4b05c18e0643489948640f3584cb5310ba577a3a8c8f238 to=sparkrt1pgss8t6fz06hmczg… amt=5 took=124ms
+[b1 order 26/50] OK order=14fe65d9b36152b98cb18a736e4c6702e6c4793954ee69354b13de7d965f7080 to=sparkrt1pgss9ev388r5en2y… amt=5 took=112ms
+[b1 order 24/50] OK order=3dedceabcdb0775ca7605ba51c854558766e156b1fe0c1dac9fc98b3f71c6685 to=sparkrt1pgssyp0z0eq0v40u… amt=5 took=114ms
+[b1 order 25/50] OK order=11e6a28dfff5f6e77267a1af5b80996688f295836f4216d29169f491d092caea to=sparkrt1pgssxm8l0znjwem9… amt=5 took=117ms
+[b1 order 27/50] OK order=c874efcdbc8846242c1c8ea4e59feedc90aeffba35be3abbc888b28e4ee04e7d to=sparkrt1pgss8pklnrtsyj8d… amt=5 took=122ms
+[b1 order 30/50] OK order=204a9d873b5b384d9e2ec8a56b2402439c6769c7fd7bf75400f93ea4df3e428c to=sparkrt1pgssyc5rp66ngm32… amt=5 took=126ms
+[b1 order 28/50] OK order=1556eeb77058afe7f0fad58161e4bf96979a586f0c6a30ce2916a4d4b542013a to=sparkrt1pgssxeulfhgwansa… amt=5 took=126ms
+[b1 order 29/50] OK order=5c96c42324d7f154ec02edf38a6d6f797f97ce4def5887b5e1765ecae1ec0f92 to=sparkrt1pgss9mltv8flktdc… amt=5 took=129ms
+[b1 order 31/50] OK order=1255aec3691ad1c162eccde134fbf830a71f1135beb9418edfb26be092a4e1ad to=sparkrt1pgssxkck8r42zcpw… amt=5 took=185ms
+[b1 order 36/50] OK order=a58f5b8997a66965b22f1ba73ac3c1e6ab7201d6a8584baefed1521a3a3dae1d to=sparkrt1pgss8u9e7pz6kmfd… amt=5 took=200ms
+[b1 order 33/50] OK order=abc6126c5eea708b206d4be336e67991f526aacb5fc14a4ad73d210006af194d to=sparkrt1pgssx8wc40tucy4e… amt=5 took=223ms
+[b1 order 34/50] OK order=207c89ad5fd3c5f8fc24c64ea72ad1aa3070cc14bf86bc16a93d9b8e9b9374e4 to=sparkrt1pgssygrcy76e6y0a… amt=5 took=213ms
+[b1 order 40/50] OK order=63377e7ff6de1f352cd6455ec1ebafdd887d6746bb240dd78a8d81b4ffd1534b to=sparkrt1pgss88fdrqclreec… amt=5 took=195ms
+[b1 order 35/50] OK order=aefb745896b3e0da0359756a427af3e753d7015b8be32bce7c106a697749310f to=sparkrt1pgss8cg3e7d7yy4w… amt=5 took=211ms
+[b1 order 37/50] OK order=e5e180e4ff90ba67363dde8dcc2b1a7dd70abb564ec31078834fba875019f713 to=sparkrt1pgssyqaka4dh25w5… amt=5 took=203ms
+[b1 order 39/50] OK order=b59ebe768f49ac40d2269b446a53dc4b3ed4153356b497d0eb60b7118aa3678a to=sparkrt1pgss8llh2q6v83cq… amt=5 took=198ms
+[b1 order 32/50] OK order=5355855cc02e820fec6c108d52d7f31387278e4a0d0618c7718b1f487a8061aa to=sparkrt1pgssyet3zfsrl4sk… amt=5 took=225ms
+[b1 order 38/50] OK order=c31f4baaeff938837df87c5e547d7ea09299b04c261fd85a0dba9fefc9cf6ea1 to=sparkrt1pgssx8aynarvscqy… amt=5 took=202ms
+[b1 order 41/50] OK order=cec4094a6e8815721a2787eb04bdc88541ecd28c9739793dc5fd12c6f3bf74e6 to=sparkrt1pgss8w7762fljh5y… amt=5 took=114ms
+[b1 order 42/50] OK order=64ac503cec6e89eb1ff2c57e9026f70fe70b153bde750537117f2fa4d4799edb to=sparkrt1pgssxpclfwc9evce… amt=5 took=113ms
+[b1 order 43/50] OK order=51f0bc0ead151e2baa5afc1c04ad8322c801deb27036b55c29352b5cd8cf3cf3 to=sparkrt1pgssyutavzmq95j2… amt=5 took=110ms
+[b1 order 47/50] OK order=f4a041bba2c0fc87c36878ded3a9fb68c3a23d04b95688dcf1f1554dcd6ca032 to=sparkrt1pgssy8p9slln3mph… amt=5 took=111ms
+[b1 order 44/50] OK order=f68383c3a7d169c53513af37d28b93f084a25530cf5f1dfc353074f29fa97cfc to=sparkrt1pgss9u2rzd4qvrwm… amt=5 took=113ms
+[b1 order 46/50] OK order=2a8e266934c59b76ec29f529b35d8aa72d6bea816d6a110c0d9de89bfef8ac0c to=sparkrt1pgssykppruwe2n0u… amt=5 took=114ms
+[b1 order 45/50] OK order=7ecc467841f0e87db459548bb839b8338ee3e9fce57376e99ba2f7b467304826 to=sparkrt1pgssyvxsuj6p3rcj… amt=5 took=117ms
+[b1 order 49/50] OK order=45fcb241c07df1d4251c80f7e9368fcb8733a74233bb41e09264ccda6ed2f5bf to=sparkrt1pgssx0wjg8k0j287… amt=5 took=116ms
+[b1 order 48/50] OK order=a4f417bd9016211d1a06a0f969fdc499d0730573de62080009db87d0839f9083 to=sparkrt1pgss8g38mt0shk76… amt=5 took=116ms
+[b1 order 50/50] OK order=6ed66e3ed15dba8ead7d88d1f5cb448e7faf027f4a74644e519cea1280da96d0 to=sparkrt1pgss8j387xre4j3c… amt=5 took=114ms
+Phase 1 batch 1 done in 0.9s: created=50 failed=0
+
+=== Phase 2: sending 50 Spark transfers (concurrency=50) ===
+[b1 xfer  17/50] ERR order=120d04e88c0c794c8800b03ca6a9c733eb8ef0d73b1f1d96f8eef23728d16377: Not enough leaves to swap for the target amount [traceId: 2ecee94f7cc14bf3beda43d94224a700, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  18/50] ERR order=95b9d1a10e1d81bce8a6d07ee52da74063ce7727dbe8d4a639d0f0515d71603b: Not enough leaves to swap for the target amount [traceId: 38bcc2c6344592f08e64db6e13a1dfd6, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  19/50] ERR order=992a4374bfd861a925b40cb5b0e5e9f680aaa88b10872ce8a3bda328e20c17b0: Not enough leaves to swap for the target amount [traceId: 925cdde1c7380c7f86459ba646c1ca0f, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  20/50] ERR order=2ff7ae1319d6a5e9819ee409c88dcc780963251a764afc6291e551d386d48167: Not enough leaves to swap for the target amount [traceId: a7973ee8040f3e8c647b818fd8155d70, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  21/50] ERR order=228dbdb8fe366ba6456892723fbbd21a835c963dccf134c6a43bde354c33be2a: Not enough leaves to swap for the target amount [traceId: fbe13f4038bcb0ff2378d5c0fad13fc2, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  22/50] ERR order=ef523c7a7832d7a4e4b05c18e0643489948640f3584cb5310ba577a3a8c8f238: Not enough leaves to swap for the target amount [traceId: 16c46f33b86cda2d34e95d34d4801cb0, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  23/50] ERR order=5d888dcf75ef7287d5ccd68e7fcb6e6cb3c1cdbd91e2d21500763b98d65f196a: Not enough leaves to swap for the target amount [traceId: c901918520c083edeffa8a0c9ff19ea1, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  24/50] ERR order=3dedceabcdb0775ca7605ba51c854558766e156b1fe0c1dac9fc98b3f71c6685: Not enough leaves to swap for the target amount [traceId: da7a2d27e463c6dc1808384cbc2d9480, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  25/50] ERR order=11e6a28dfff5f6e77267a1af5b80996688f295836f4216d29169f491d092caea: Not enough leaves to swap for the target amount [traceId: 4d394325f232ef1fa818982ed375d512, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  26/50] ERR order=14fe65d9b36152b98cb18a736e4c6702e6c4793954ee69354b13de7d965f7080: Not enough leaves to swap for the target amount [traceId: 2c0a2df7a60c675fc8196a847642ce30, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  27/50] ERR order=c874efcdbc8846242c1c8ea4e59feedc90aeffba35be3abbc888b28e4ee04e7d: Not enough leaves to swap for the target amount [traceId: d2b497a8120fc05863976b4618a144d2, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  28/50] ERR order=1556eeb77058afe7f0fad58161e4bf96979a586f0c6a30ce2916a4d4b542013a: Not enough leaves to swap for the target amount [traceId: 6946d9218b907fe630acf7a4817bf674, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  29/50] ERR order=5c96c42324d7f154ec02edf38a6d6f797f97ce4def5887b5e1765ecae1ec0f92: Not enough leaves to swap for the target amount [traceId: 2d6ea83755b524e7c21ca3759efed212, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  30/50] ERR order=204a9d873b5b384d9e2ec8a56b2402439c6769c7fd7bf75400f93ea4df3e428c: Not enough leaves to swap for the target amount [traceId: e397e2079a93972dd9a0fd4192c71da3, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  31/50] ERR order=1255aec3691ad1c162eccde134fbf830a71f1135beb9418edfb26be092a4e1ad: Not enough leaves to swap for the target amount [traceId: 276b50854b341597491a444ad33caba2, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  32/50] ERR order=5355855cc02e820fec6c108d52d7f31387278e4a0d0618c7718b1f487a8061aa: Not enough leaves to swap for the target amount [traceId: ce58c851774651e3f3b1ae9546ca4584, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  33/50] ERR order=abc6126c5eea708b206d4be336e67991f526aacb5fc14a4ad73d210006af194d: Not enough leaves to swap for the target amount [traceId: 4383389291db5b859a6fd4905ed346aa, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  34/50] ERR order=207c89ad5fd3c5f8fc24c64ea72ad1aa3070cc14bf86bc16a93d9b8e9b9374e4: Not enough leaves to swap for the target amount [traceId: 1a8b4021ebdc5cce51abf941fb360482, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  35/50] ERR order=aefb745896b3e0da0359756a427af3e753d7015b8be32bce7c106a697749310f: Not enough leaves to swap for the target amount [traceId: cf9f57901bd9351411705d8aa1354357, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  36/50] ERR order=a58f5b8997a66965b22f1ba73ac3c1e6ab7201d6a8584baefed1521a3a3dae1d: Not enough leaves to swap for the target amount [traceId: 1b0ffde35c21a0dac0cc490fe61dccf5, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  37/50] ERR order=e5e180e4ff90ba67363dde8dcc2b1a7dd70abb564ec31078834fba875019f713: Not enough leaves to swap for the target amount [traceId: d57aec47a31b28734d1696761350dbfa, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  38/50] ERR order=c31f4baaeff938837df87c5e547d7ea09299b04c261fd85a0dba9fefc9cf6ea1: Not enough leaves to swap for the target amount [traceId: ea9eb9446de19dab384b8b7e1a1f869f, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  39/50] ERR order=b59ebe768f49ac40d2269b446a53dc4b3ed4153356b497d0eb60b7118aa3678a: Not enough leaves to swap for the target amount [traceId: 41c597d30513d4454f80fe1676e6c878, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  40/50] ERR order=63377e7ff6de1f352cd6455ec1ebafdd887d6746bb240dd78a8d81b4ffd1534b: Not enough leaves to swap for the target amount [traceId: 54e42fab263303384f3f147be56ed518, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  41/50] ERR order=cec4094a6e8815721a2787eb04bdc88541ecd28c9739793dc5fd12c6f3bf74e6: Not enough leaves to swap for the target amount [traceId: 73a5556502c52b00ebf4b9358cdf16cb, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  42/50] ERR order=64ac503cec6e89eb1ff2c57e9026f70fe70b153bde750537117f2fa4d4799edb: Not enough leaves to swap for the target amount [traceId: 39bdc6233a975fb618f06837684f9494, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  43/50] ERR order=51f0bc0ead151e2baa5afc1c04ad8322c801deb27036b55c29352b5cd8cf3cf3: Not enough leaves to swap for the target amount [traceId: 260705f11d3e1cc28e556d6a4584f3ad, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  44/50] ERR order=f68383c3a7d169c53513af37d28b93f084a25530cf5f1dfc353074f29fa97cfc: Not enough leaves to swap for the target amount [traceId: bc6c65e9f5c349293d81fee870bcad71, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  45/50] ERR order=7ecc467841f0e87db459548bb839b8338ee3e9fce57376e99ba2f7b467304826: Not enough leaves to swap for the target amount [traceId: 534cdc0653ba581f6462a2c995aedd44, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  46/50] ERR order=2a8e266934c59b76ec29f529b35d8aa72d6bea816d6a110c0d9de89bfef8ac0c: Not enough leaves to swap for the target amount [traceId: ad74996dc834c88bdeb9b177ffc15bd2, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  47/50] ERR order=f4a041bba2c0fc87c36878ded3a9fb68c3a23d04b95688dcf1f1554dcd6ca032: Not enough leaves to swap for the target amount [traceId: 05c9ad06adedbfa63cc777291527f708, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  48/50] ERR order=a4f417bd9016211d1a06a0f969fdc499d0730573de62080009db87d0839f9083: Not enough leaves to swap for the target amount [traceId: 3afe0521d74489733f1937a5aa850085, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  49/50] ERR order=45fcb241c07df1d4251c80f7e9368fcb8733a74233bb41e09264ccda6ed2f5bf: Not enough leaves to swap for the target amount [traceId: aadbe8960bf648093b5aaf348a175d75, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  50/50] ERR order=6ed66e3ed15dba8ead7d88d1f5cb448e7faf027f4a74644e519cea1280da96d0: Not enough leaves to swap for the target amount [traceId: 3df6b1ef0b0e5bad79b0e6cda3c5d8df, idPubKey: 024a78a86349d32e576efb95d41177953cda7fe87a1b3c923933280983f029d9ca, clientEnv: js-spark-sdk/0.7.14 node/v24.13.1]
+[b1 xfer  01/50] OK order=d5693451d59081db14663ae0308a974d4f973c75a7aff31cdf022e64ce2994eb tx=019e3f68-06e2-7dab-b220-502074d4e75c took=8760ms
+[b1 xfer  02/50] OK order=2fb7ce53d734a355489150bf52888107e6ae4ead56e42b314b3adf38d35703db tx=019e3f68-088e-7f33-adc7-71e3e622fa20 took=9135ms
+[b1 xfer  04/50] OK order=7b274f7ab198f25cf7acbe545407c08ba4d7eae4c6396b8dc5d5e08620a4f528 tx=019e3f68-0c6d-7551-99fa-b29b232f7afd took=10334ms
+[b1 xfer  08/50] OK order=04e92d6e557dbdd295d81770d0459fe37971aef84d11cdf94dc9194c9d7247d6 tx=019e3f68-1711-7407-84c3-0bbd6e92a697 took=12105ms
+[b1 xfer  13/50] OK order=fdaf5d52dcfed14e02beb61a4fa38ea3f77329f80ac1cdf49151abf596a1a67a tx=019e3f68-17a3-7e9b-a243-314d292e9334 took=12105ms
+[b1 xfer  06/50] OK order=20d6b149affeb1ab0bb6aed0ae909c6915da12719a8401e094d62609646eab9b tx=019e3f68-16d9-70aa-b176-f2b159abe8fa took=12371ms
+[b1 xfer  07/50] OK order=eba3720fa55b672c236c573eb151d7705cc74ef0e8fba7af2efd86ade0931d6d tx=019e3f68-18b9-7ac0-955f-cd898e19b47d took=12465ms
+[b1 xfer  09/50] OK order=417b91795f840003316fb6c0516d0e7e52d73580fa692746ea54c29a64eeec22 tx=019e3f68-1ac9-750f-b690-b3aeac4e7df4 took=12664ms
+[b1 xfer  14/50] OK order=935b387bdaabfe0b4354338287a36af14b82da76d2786fa09795b21a33ac0ae7 tx=019e3f68-1ceb-7743-ba65-ac0beaad648b took=13519ms
+[b1 xfer  11/50] OK order=ff83f0b81ea3b4e5f5de411bcf4bb7a11f704e0d4d6a82ae9d3dd2bcb9d08db0 tx=019e3f68-1cdc-7533-bc76-202b673558d2 took=13520ms
+[b1 xfer  12/50] OK order=255703ae690a1beddfd37c2c1617e070086612104b91e87ed8f573583a66592b tx=019e3f68-1be2-7c75-9cd7-278ef0c46603 took=13521ms
+[b1 xfer  10/50] OK order=34d83391e0af6024cfb636d16a5d73472c3afe45d649e24b1cdcef76d362954d tx=019e3f68-20e8-760c-bb86-ad7aa6d96490 took=13996ms
+[b1 xfer  16/50] OK order=ddd94e71939eb8b277e71aff78fece4781bbefebaa9afa03db26f2d140b18871 tx=019e3f68-21e1-76cc-84b1-a3f0c3512677 took=14333ms
+[b1 xfer  03/50] OK order=8b84df8e16d8e0330f26df2756ce0fab03301c3b9acadd2957a9b81b9ae9174e tx=019e3f68-24fe-76b7-8781-80858d56e94c took=14829ms
+[b1 xfer  05/50] OK order=c787908cf43861c717ca0581d7101e612bec7958c8c1f5ba026306802dfd594f tx=019e3f68-27eb-72c2-86fc-d777d3eb292b took=15577ms
+[b1 xfer  15/50] OK order=7986f636350980d184cfdce8b7928e0cf67001239f87173a277f77bba0fa21f4 tx=019e3f68-2c47-72f3-86cd-24bb55159172 took=16681ms
+Phase 2 batch 1 done in 16.7s: ok=16 err=34
+Batch 1 total wall: 17.5s
+
+############ Batch 2/8  (50 swaps) ############
+
+=== Phase 1: creating 50 orders (concurrency=10) ===
+[b2 order 03/50] OK order=fa71df18e17c83e392eae8705de00ff68e4a793abb5e7fcab2e8fbf4e871e826 to=sparkrt1pgssxuqwxzp28uuc… amt=5 took=133ms
+[b2 order 01/50] OK order=090eebd25ea94dc3d02440c89c8426a9230fe5790e2ee47264169f7d17227f2c to=sparkrt1pgss9k4pshzqkvev… amt=5 took=134ms
+[b2 order 02/50] OK order=a8e92d9b7e0658de486e7a8f0ebdf79a589cd4160f2e15b7cd4c24b71c96b5a4 to=sparkrt1pgss873lrnel928g… amt=5 took=136ms
+[b2 order 04/50] OK order=924b517ad1486e3442a83e204f190ad75f4d5cbb2557711d8871a2b5fe8a2b09 to=sparkrt1pgss9umlwau2lm46… amt=5 took=136ms
+[b2 order 10/50] OK order=cb26654db0fcb9ea34d9f3945f261808700357e87a9c0163cd68fa4e1b6b3d50 to=sparkrt1pgssyc2r0g2pmffv… amt=5 took=135ms
+[b2 order 08/50] OK order=595ae753c3e22fd8427c4a0ab4e002ec3bcde846952995edb32c3980aa4ffd20 to=sparkrt1pgssyleulmyz28jc… amt=5 took=149ms
+[b2 order 05/50] OK order=39da6f0535a64dd7ec7026f9f3870695d81c58c84a50aece5951a4b7831469db to=sparkrt1pgss959yhxu7j7uj… amt=5 took=155ms
+[b2 order 06/50] OK order=5cf0c50800b157f9fa2379988a4163aa41d8509f785fcf415610a4a6fbb46a0d to=sparkrt1pgssyk425m05khqe… amt=5 took=155ms
+[b2 order 07/50] OK order=2adb478def9f5a1d0cac9c98ac04667f6e5e9f69eb8a6445ca2a0713ed19e85c to=sparkrt1pgss9496ahyvtfsd… amt=5 took=154ms
+[b2 order 09/50] OK order=cde0483ef121f9d22c61046a720a090a1863bb8ae2a48089c6a14e7ecd530106 to=sparkrt1pgss8rnp9ymg62cq… amt=5 took=154ms
+[b2 order 11/50] OK order=4e50f3516f5bed2fb9167ee510b544ba25ba8ba1891ccb94e50f36be559f365f to=sparkrt1pgssxdf2gr65qqd4… amt=5 took=113ms
+[b2 order 15/50] OK order=3fdf45085f138422b3839a26e3b3f1b7b0c90761b997abded7e5a9b7658a99d8 to=sparkrt1pgss84cw9m3dsen4… amt=5 took=111ms
+[b2 order 13/50] OK order=07d16151136f8eaf30207e30ecacc061a02864f90f35b7268b4f04bec4719f1f to=sparkrt1pgss84x5p0tshw9p… amt=5 took=127ms
+[b2 order 16/50] OK order=908f2469afbea64462ba72ec9040eead052151d7a621b4a1dcb20da7158fe75d to=sparkrt1pgssya4vwtcawdep… amt=5 took=114ms
+[b2 order 14/50] OK order=e70f5e5e885c36e1c22c2616eebaa4a24ba3d5f2d07ab3f14bfcf36960a5047d to=sparkrt1pgssywwny547426f… amt=5 took=129ms
+[b2 order 12/50] OK order=4d14f47a564714d98193d43bbd0cc58fa117a0c05eea72c442e5e8fdc2890647 to=sparkrt1pgssxh8nu64klt0l… amt=5 took=131ms
+[b2 order 20/50] OK order=d0e70615c8d124b0f8ccddbfa0fbfa3d440512cf869b12f99ac700fb5a9df5e5 to=sparkrt1pgss97y27n76qscs… amt=5 took=113ms
+[b2 order 18/50] OK order=f4a8ac966bf1f474b27c4882a425e8f9849683f3d11573a1832da97c6f9e9961 to=sparkrt1pgss9n7mhvuqz30e… amt=5 took=115ms
+[b2 order 17/50] OK order=d33d1257b8ce50bc1450e0085265c9323c9c906f737453fec996f894ef37ea7d to=sparkrt1pgss9z588sp55zm7… amt=5 took=115ms
+[b2 order 19/50] OK order=ec8070de78f2e9e6ad6506fe976a00d89ea243146ad166a5336e54d5672230f6 to=sparkrt1pgssxmuwejlm6uxj… amt=5 took=116ms
+[b2 order 22/50] OK order=9c4bc38a89fd1ddc4299f39979ff259cbaba18217d0318ccddd2d2a55c354614 to=sparkrt1pgss8kw4rstky3fx… amt=5 took=166ms
+[b2 order 21/50] OK order=e288299a75958bc75437d700f1000b9ed70a28fbbf92086987f92e733808656c to=sparkrt1pgss86rtjj4cel32… amt=5 took=167ms
+[b2 order 23/50] OK order=1a4a60efc92af627409eff95aa070438974592656a0d7474dc167cb8cac93b85 to=sparkrt1pgssyws203tmj033… amt=5 took=206ms
+[b2 order 27/50] OK order=c487fd869fa5a797044aa402302887502fb0161e657aa512b240353c0f9adc34 to=sparkrt1pgssx6pn94qn3jyd… amt=5 took=208ms
+[b2 order 28/50] OK order=92c0a8ba9302b1fa73648366c1cdb6b6b427eb6b2b14cb472f3f0fe54d1c040b to=sparkrt1pgssy6z6jhug576l… amt=5 took=206ms
+[b2 order 25/50] OK order=8f545d59b821e78483a2b57b43c57833a82e24f4c1e81a50e0917e28ec3b6f9f to=sparkrt1pgss8x73ljfud78t… amt=5 took=211ms
+[b2 order 30/50] OK order=e5b51477bf74055a2e4e853be204d94dcbbd2e207f50d8fba429aa7bb28927af to=sparkrt1pgssyza0rkysq88z… amt=5 took=206ms
+[b2 order 29/50] OK order=ac5583c98657a7974ad291fe1277022d997bc9043e23761a29a085ca1fe2f44f to=sparkrt1pgssydfxv9yvtga2… amt=5 took=207ms
+[b2 order 24/50] OK order=571b5764e9e9f16b1c7cb21acb7fecec4e2f9bf136775e5e7420fcb33cb70370 to=sparkrt1pgss8vscectj0h0u… amt=5 took=213ms
+[b2 order 26/50] OK order=721a6073ed684aed0e047257a71bb32596823dded29834eff76ed979607a5565 to=sparkrt1pgssx0nc62jpl23h… amt=5 took=212ms
+[b2 order 32/50] OK order=1cb8ab7b8b3f80a4f80585bf18f7fdb82771281fc7288eb44999395140abd93f to=sparkrt1pgss8esgh4mkv9cy… amt=5 took=120ms
+[b2 order 31/50] OK order=5558f3dd989e2b0179045b52285cdebb5520232c85b10b09b44add99acd71741 to=sparkrt1pgss9tfhzhm2vn62… amt=5 took=122ms
+[b2 order 34/50] OK order=9bfc70d69a310d7a1aa4537508c7377bcd371847197c569a2823bbd6bc6e2ccc to=sparkrt1pgssyjar0mjhx8g0… amt=5 took=105ms
+[b2 order 33/50] OK order=ab3e977d2c19eb73a5e59dea7d3c6151d4ea36bc5abd28792a2803244df2952f to=sparkrt1pgss8z8jy6c2vjte… amt=5 took=112ms
+[b2 order 38/50] OK order=4a672412c3c943214bdd1bb5ee31113185a22a2c020997b81af89dbfdadf6a3b to=sparkrt1pgssx0yhwlcza3fk… amt=5 took=113ms
+[b2 order 40/50] OK order=2c93cd93008ca4058c1faad7f3684cda9019cff71c4a0ee0b931a7c90c3516b6 to=sparkrt1pgss9rpv6285kqdd… amt=5 took=114ms
+[b2 order 36/50] OK order=f1ac5b263f82d394313eca41b57591f3191839528e8e4c75259825909fe3bb03 to=sparkrt1pgss8daheckmg42p… amt=5 took=117ms
+[b2 order 39/50] OK order=f312786ddad7e71f35ec723b999470f86da1fa5b931047b68a23b39a496889ab to=sparkrt1pgss8y0la027wgxr… amt=5 took=119ms
+[b2 order 37/50] OK order=0d36e397a41ab08f661e34fdeb01c218e826447431552e4d4f2ec35acd8066fc to=sparkrt1pgssy6ptl7d94vtc… amt=5 took=119ms
+[b2 order 35/50] OK order=3e954a4b2cf9e6fa644facafd970def64fdaedf06fbc1be627cc390d7a69fc10 to=sparkrt1pgssyz8ct29kj5mv… amt=5 took=120ms
+[b2 order 41/50] OK order=01e9a38615a3e4dd05292f019fee1433c895a616c0a6cb51c81680bc7609f1b6 to=sparkrt1pgssyl304jj4nfmu… amt=5 took=109ms
+[b2 order 42/50] OK order=7a422c38d91bf5cab6538c6364ba094baf8c62ed54ddb6bf214318110a57c45c to=sparkrt1pgssye95xtgartt3… amt=5 took=110ms
+[b2 order 44/50] OK order=79521941d069557385f41da1ceaa5d7f85e6e511b78d3ca50cde134365d59119 to=sparkrt1pgssxdtagqd4tppn… amt=5 took=120ms
+[b2 order 45/50] OK order=ed8753171dd494d6e7cd60904ac77d001a000e71ad8744659b7bbe6186d0c52f to=sparkrt1pgss8xpxvld3xxj9… amt=5 took=118ms
+[b2 order 47/50] OK order=27fef377df9003ba9ceaca1f476d0f0dfa30e75cdfd1128365272b8107cede9d to=sparkrt1pgssxlfn6lgc2ar3… amt=5 took=116ms
+[b2 order 48/50] OK order=18d05c076e6cd33d044f12fd301589404e2d0b93ca3050b8291fbbeb2ee45ce7 to=sparkrt1pgssxudw0a985vwy… amt=5 took=114ms
+[b2 order 49/50] OK order=33e735a6a3e5a9524c86b8dd01cb079615ab0135f9b665bca9d0be166ee660a0 to=sparkrt1pgssyjjzrxmktvp7… amt=5 took=114ms
+[b2 order 43/50] OK order=ee9d1b371dc51b4b1a499af69851a5d9e2362f3e2ed3dbcb859aa32576f78ce5 to=sparkrt1pgss98nth97xzcr0… amt=5 took=128ms
+[b2 order 50/50] OK order=d46106e712b7445f108f9ee5536c0aea66a57b04ec7c75336d84674b01d4005f to=sparkrt1pgss8xar09j9pt0z… amt=5 took=114ms
+[b2 order 46/50] OK order=85ff6290388e0fee07c17bac68924ebf08f9617851926388451b8ffdced5c59b to=sparkrt1pgssy7zcp0rw8en5… amt=5 took=121ms
+Phase 1 batch 2 done in 0.7s: created=50 failed=0
+
+=== Phase 2: sending 50 Spark transfers (concurrency=50) ===
+[b2 xfer  05/50] OK order=39da6f0535a64dd7ec7026f9f3870695d81c58c84a50aece5951a4b7831469db tx=019e3f68-3297-719d-953c-08a4e51f5888 took=1516ms
+[b2 xfer  01/50] OK order=090eebd25ea94dc3d02440c89c8426a9230fe5790e2ee47264169f7d17227f2c tx=019e3f68-3287-7355-a51e-a016328e3d10 took=2336ms
+[b2 xfer  06/50] OK order=5cf0c50800b157f9fa2379988a4163aa41d8509f785fcf415610a4a6fbb46a0d tx=019e3f68-329e-74ab-a24f-0ecb2f93e36b took=2336ms
+[b2 xfer  03/50] OK order=fa71df18e17c83e392eae8705de00ff68e4a793abb5e7fcab2e8fbf4e871e826 tx=019e3f68-328c-73e3-bc37-16d04d2c1774 took=2584ms
+[b2 xfer  02/50] OK order=a8e92d9b7e0658de486e7a8f0ebdf79a589cd4160f2e15b7cd4c24b71c96b5a4 tx=019e3f68-3289-7e2d-93a0-5c0017df2e4a took=2584ms
+[b2 xfer  08/50] OK order=595ae753c3e22fd8427c4a0ab4e002ec3bcde846952995edb32c3980aa4ffd20 tx=019e3f68-32aa-7076-a106-813b57614536 took=2839ms
+[b2 xfer  11/50] OK order=4e50f3516f5bed2fb9167ee510b544ba25ba8ba1891ccb94e50f36be559f365f tx=019e3f68-32bd-748e-ba81-d6db8e2108b8 took=3089ms
+[b2 xfer  07/50] OK order=2adb478def9f5a1d0cac9c98ac04667f6e5e9f69eb8a6445ca2a0713ed19e85c tx=019e3f68-32a4-76a7-8c18-e05279fe35e2 took=3361ms
+[b2 xfer  04/50] OK order=924b517ad1486e3442a83e204f190ad75f4d5cbb2557711d8871a2b5fe8a2b09 tx=019e3f68-3290-745a-929d-3dfdbf4e32c3 took=3362ms
+[b2 xfer  10/50] OK order=cb26654db0fcb9ea34d9f3945f261808700357e87a9c0163cd68fa4e1b6b3d50 tx=019e3f68-32b7-7df1-9775-b3c2a7e509e6 took=3361ms
+[b2 xfer  09/50] OK order=cde0483ef121f9d22c61046a720a090a1863bb8ae2a48089c6a14e7ecd530106 tx=019e3f68-32b2-7015-81c4-1895d97e8c35 took=3361ms

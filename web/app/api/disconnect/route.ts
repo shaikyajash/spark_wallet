@@ -1,6 +1,6 @@
-import { clearWallet } from "@/lib/wallet-store";
+import { clearSession } from "@/lib/session";
 
 export async function POST() {
-  clearWallet();
+  await clearSession();
   return Response.json({ ok: true });
 }
