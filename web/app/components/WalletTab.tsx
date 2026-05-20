@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { Status } from "./ui";
 
 interface Transfer {
@@ -11,12 +11,68 @@ interface Transfer {
 
 const TX_PAGE = 5;
 
-async function api(path: string, opts?: RequestInit) {
-  const res = await fetch(path, opts);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-  return data;
+async function api(path: string, opts?: RequestInit, retries = 2) {
+  let lastError: Error | null = null;
+
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(path, opts);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      return data;
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      if (i < retries) {
+        await new Promise(r => setTimeout(r, 100 * (i + 1)));
+        continue;
+      }
+    }
+  }
+
+  throw lastError;
 }
+
+const TransactionRow = memo(({ tx, network, onCopyId }: {
+  tx: Transfer;
+  network: string;
+  onCopyId: (id: string) => void;
+}) => {
+  const isIn = tx.direction === "INCOMING";
+  const date = tx.createdAt ? new Date(tx.createdAt).toLocaleString() : "—";
+  const shortId = tx.id ? `${tx.id.slice(0, 18)}…` : "—";
+  const explorerUrl = network === "MAINNET"
+    ? `https://sparkscan.io/tx/${tx.id}`
+    : `https://sparkscan.io/tx/${tx.id}?network=regtest`;
+
+  return (
+    <a
+      href={explorerUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group bg-[#0a0a0a] border border-[rgba(255,255,255,0.05)] hover:border-[rgba(247,147,26,0.3)] hover:bg-[rgba(255,255,255,0.02)] rounded-xl p-4 flex items-center justify-between gap-3 transition-all no-underline"
+    >
+      <div className="flex flex-col gap-1 min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className={`text-[0.65rem] font-bold uppercase px-2 py-1 rounded rounded-md ${
+            isIn ? "bg-[rgba(34,197,94,0.1)] text-[#22c55e]" : "bg-[rgba(239,68,68,0.1)] text-[#ef4444]"
+          }`}>
+            {isIn ? "Received" : "Sent"}
+          </span>
+          <span className="text-[0.75rem] text-[#555]">{date}</span>
+        </div>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-[0.75rem] font-mono text-[#444] truncate">{shortId}</span>
+          <svg className="w-2.5 h-2.5 text-[#666] opacity-30 group-hover:opacity-100 transition-opacity flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </div>
+      </div>
+      <span className={`text-base font-black whitespace-nowrap ${isIn ? "text-[#22c55e]" : "text-[#e0e0e0]"}`}>
+        {isIn ? "+" : "−"}{Number(tx.sats).toLocaleString()} <span className="text-xs opacity-60">sats</span>
+      </span>
+    </a>
+  );
+});
 
 export default function WalletTab() {
   const [connected, setConnected] = useState(false);
@@ -92,7 +148,17 @@ export default function WalletTab() {
       if (refreshInFlight.current) return;
       refreshInFlight.current = true;
       try {
+        // Verify still connected before refresh
+        const status = await api("/api/status", {}, 0);
+        if (!status.connected) {
+          setConnected(false);
+          setAddress("");
+          if (timerRef.current) clearInterval(timerRef.current);
+          return;
+        }
         await Promise.all([refreshBalance(true), loadTx({ page: txPage, offsets: txOffsets, silent: true })]);
+      } catch {
+        // Silent failure on refresh, don't disconnect
       } finally {
         refreshInFlight.current = false;
       }
@@ -254,107 +320,66 @@ export default function WalletTab() {
 
   if (!connected) {
     return (
-      <div style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-        <div style={{ width: "100%", maxWidth: 420 }}>
-          {/* Ambient glow behind card */}
-          <div style={{ position: "relative" }}>
-            <div style={{ position: "absolute", inset: -40, background: "radial-gradient(circle, rgba(247,147,26,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div className="min-h-[80vh] flex items-center justify-center p-5">
+        <div className="w-full max-w-sm">
+          <div className="relative">
+            <div className="absolute -inset-10 bg-gradient-radial from-[rgba(247,147,26,0.08)] to-transparent pointer-events-none" />
+            <div className="relative bg-gradient-to-br from-[#161616] to-[#111] border border-[rgba(255,255,255,0.12)] rounded-3xl p-9 shadow-[0_0_0_1px_rgba(0,0,0,0.5),0_24px_48px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <div className="absolute top-0 left-1/5 right-1/5 h-px bg-gradient-to-r from-transparent via-[rgba(247,147,26,0.6)] to-transparent" />
 
-            <div style={{
-              position: "relative",
-              background: "linear-gradient(145deg, #161616, #111)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 24,
-              padding: "36px 32px",
-              boxShadow: "0 0 0 1px rgba(0,0,0,0.5), 0 24px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-            }}>
-              {/* Top accent */}
-              <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg, transparent, rgba(247,147,26,0.6), transparent)" }} />
-
-              {/* Logo + title */}
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 14,
-                  background: "linear-gradient(135deg, #f7931a, #e55a00)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 22, fontWeight: 900, color: "#000",
-                  boxShadow: "0 0 24px rgba(247,147,26,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
-                  flexShrink: 0,
-                }}>₿</div>
+              <div className="flex items-center gap-3.5 mb-7">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#f7931a] to-[#e55a00] flex items-center justify-center text-2xl font-black text-black shadow-[0_0_24px_rgba(247,147,26,0.35),inset_0_1px_0_rgba(255,255,255,0.2)] flex-shrink-0">₿</div>
                 <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <h2 style={{ fontSize: 22, fontWeight: 800, color: "#f0f0f0", letterSpacing: "-0.5px", margin: 0 }}>Connect Wallet</h2>
-                    <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "1.2px", textTransform: "uppercase", color: "#f0b061", background: "rgba(247,147,26,0.1)", border: "1px solid rgba(247,147,26,0.2)", padding: "3px 7px", borderRadius: 999 }}>Secure</span>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-2xl font-bold text-[#f0f0f0] -tracking-[0.5px]">Connect Wallet</h2>
+                    <span className="text-[0.65rem] font-bold uppercase tracking-widest text-[#f0b061] bg-[rgba(247,147,26,0.1)] border border-[rgba(247,147,26,0.2)] px-2 py-0.5 rounded-full">Secure</span>
                   </div>
-                  <p style={{ fontSize: 12, color: "#555", marginTop: 2 }}>Spark network · end-to-end encrypted</p>
+                  <p className="text-[0.75rem] text-[#555] mt-0.5">Spark network · end-to-end encrypted</p>
                 </div>
               </div>
 
-              {/* Network selector */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#666", marginBottom: 8 }}>Network</label>
-                <div style={{ position: "relative" }}>
+              <div className="mb-4">
+                <label className="block text-[0.7rem] font-bold uppercase tracking-widest text-[#666] mb-2">Network</label>
+                <div className="relative">
                   <select
                     value={network}
                     onChange={(e) => setNetwork(e.target.value)}
-                    style={{
-                      width: "100%", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.12)",
-                      borderRadius: 12, color: "#e0e0e0", fontSize: 14, fontWeight: 600,
-                      padding: "12px 40px 12px 14px", outline: "none", cursor: "pointer",
-                      appearance: "none", fontFamily: "inherit",
-                      boxShadow: "inset 0 2px 4px rgba(0,0,0,0.3)",
-                    }}
-                    onFocus={e => (e.currentTarget.style.borderColor = "rgba(247,147,26,0.5)")}
-                    onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+                    className="w-full bg-[#0d0d0d] border border-[rgba(255,255,255,0.12)] focus:border-[rgba(247,147,26,0.5)] rounded-2xl text-[#e0e0e0] text-sm font-semibold py-3 pl-3.5 pr-10 outline-none appearance-none cursor-pointer shadow-inner transition-colors"
                   >
                     <option value="MAINNET">Mainnet — spark1...</option>
                     <option value="REGTEST">Regtest — sparkrt1...</option>
                   </select>
-                  <svg style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#555", pointerEvents: "none" }} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#555] pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </div>
 
-              {/* Mnemonic input */}
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#666", marginBottom: 8 }}>Mnemonic Phrase</label>
+              <div className="mb-6">
+                <label className="block text-[0.7rem] font-bold uppercase tracking-widest text-[#666] mb-2">Mnemonic Phrase</label>
                 <input
                   type="password"
                   placeholder="Enter your 12-word seed phrase"
                   value={mnemonic}
                   onChange={(e) => setMnemonic(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && connect()}
-                  style={{
-                    width: "100%", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 12, color: "#e8e8e8", fontSize: 14,
-                    padding: "13px 14px", outline: "none", fontFamily: "inherit",
-                    boxShadow: "inset 0 2px 4px rgba(0,0,0,0.3)",
-                    boxSizing: "border-box",
-                  }}
-                  onFocus={e => (e.currentTarget.style.borderColor = "rgba(247,147,26,0.5)")}
-                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+                  className="w-full bg-[#0d0d0d] border border-[rgba(255,255,255,0.12)] focus:border-[rgba(247,147,26,0.5)] rounded-2xl text-[#e8e8e8] text-sm py-3 px-3.5 outline-none shadow-inner transition-colors"
                 />
-                <p style={{ fontSize: 11, color: "#444", marginTop: 6 }}>Your phrase never leaves this device.</p>
+                <p className="text-[0.7rem] text-[#444] mt-1.5">Your phrase never leaves this device.</p>
               </div>
 
-              {/* Connect button */}
               <button
                 onClick={connect}
                 disabled={connectLoading}
-                style={{
-                  width: "100%", border: "none", borderRadius: 14, padding: "14px",
-                  fontSize: 15, fontWeight: 800, cursor: connectLoading ? "default" : "pointer",
-                  background: connectLoading ? "rgba(247,147,26,0.3)" : "linear-gradient(135deg, #f7931a, #e55a00)",
-                  color: connectLoading ? "rgba(0,0,0,0.5)" : "#000",
-                  boxShadow: connectLoading ? "none" : "0 4px 16px rgba(247,147,26,0.3)",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  transition: "all 0.2s",
-                }}
+                className={`w-full border-0 rounded-2xl py-3.5 text-sm font-black cursor-pointer flex items-center justify-center gap-2 transition-all shadow-[0_4px_16px_rgba(247,147,26,0.3)] ${
+                  connectLoading
+                    ? "bg-[rgba(247,147,26,0.3)] text-[rgba(0,0,0,0.5)] shadow-none"
+                    : "bg-gradient-to-br from-[#f7931a] to-[#e55a00] text-black hover:opacity-90"
+                }`}
               >
                 {connectLoading ? (
                   <>
-                    <svg style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                    <svg className="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle opacity="0.25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
                     Connecting…
                   </>
                 ) : "Connect Wallet"}
@@ -364,7 +389,6 @@ export default function WalletTab() {
             </div>
           </div>
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -380,138 +404,93 @@ export default function WalletTab() {
     setConnectStatus({ msg: "", type: "" });
   }
 
-  const card: React.CSSProperties = {
-    background: "linear-gradient(145deg, #141414, #111)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 20,
-    padding: "24px",
-    display: "flex",
-    flexDirection: "column",
-    gap: 16,
-    position: "relative",
-    overflow: "hidden",
-  };
-  const label: React.CSSProperties = {
-    fontSize: 10, fontWeight: 700, letterSpacing: "1.2px",
-    textTransform: "uppercase", color: "#555",
-  };
-  const inp: React.CSSProperties = {
-    background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 10, color: "#e0e0e0", fontSize: 13,
-    padding: "11px 14px", outline: "none", width: "100%", fontFamily: "inherit",
-  };
-  const sectionTitle = (text: string, badge?: string) => (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-      <span style={{ fontSize: 13, fontWeight: 700, color: "#ccc" }}>{text}</span>
-      {badge && <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1.2px", textTransform: "uppercase", color: "#f0b061", background: "rgba(247,147,26,0.1)", border: "1px solid rgba(247,147,26,0.2)", padding: "3px 8px", borderRadius: 999 }}>{badge}</span>}
+  const SectionTitle = ({ text, badge }: { text: string; badge?: string }) => (
+    <div className="flex items-center justify-between mb-1">
+      <span className="text-sm font-bold text-[#ccc]">{text}</span>
+      {badge && <span className="text-[0.65rem] font-bold uppercase tracking-widest text-[#f0b061] bg-[rgba(247,147,26,0.1)] border border-[rgba(247,147,26,0.2)] px-2 py-0.5 rounded-full">{badge}</span>}
     </div>
   );
 
   return (
-    <div style={{ padding: "28px 24px", maxWidth: 1100, margin: "0 auto" }}>
-
-      {/* Top bar: address + network + disconnect */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px rgba(34,197,94,0.6)" }} />
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#555" }}>Connected</span>
-          <span style={{ fontSize: 11, color: "#333", fontFamily: "JetBrains Mono, monospace" }}>·</span>
-          <span style={{ fontSize: 11, color: "#666", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", padding: "3px 10px", borderRadius: 8, fontFamily: "JetBrains Mono, monospace" }}>
+    <div className="p-7 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-2 h-2 rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+          <span className="text-xs font-semibold text-[#555]">Connected</span>
+          <span className="text-[0.7rem] text-[#333] font-mono">·</span>
+          <span className="text-[0.7rem] text-[#666] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-2.5 py-0.5 rounded font-mono">
             {network === "REGTEST" ? "Regtest" : "Mainnet"}
           </span>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="flex gap-2 items-center flex-wrap">
           <button
             onClick={togglePrivacy}
             disabled={privacyLoading || privacyEnabled === null}
             title={privacyEnabled === false ? "Wallet is public — click to enable privacy" : "Wallet is private — click to make public"}
-            style={{
-              background: privacyEnabled === false ? "rgba(247,147,26,0.12)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${privacyEnabled === false ? "rgba(247,147,26,0.35)" : "rgba(255,255,255,0.08)"}`,
-              borderRadius: 8,
-              padding: "6px 12px",
-              fontSize: 11,
-              fontWeight: 700,
-              color: privacyEnabled === false ? "#f0b061" : "#888",
-              cursor: privacyLoading || privacyEnabled === null ? "default" : "pointer",
-              opacity: privacyLoading || privacyEnabled === null ? 0.6 : 1,
-              fontFamily: "inherit",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
+            className={`px-3 py-1.5 rounded text-[0.7rem] font-bold flex items-center gap-1.5 transition-all ${
+              privacyEnabled === false
+                ? "bg-[rgba(247,147,26,0.12)] border border-[rgba(247,147,26,0.35)] text-[#f0b061]"
+                : "bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[#888]"
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
           >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: privacyEnabled === false ? "#f7931a" : "#555" }} />
-            {privacyLoading
-              ? "…"
-              : privacyEnabled === null
-              ? "Privacy"
-              : privacyEnabled
-              ? "Private"
-              : "Public"}
+            <span className={`w-1.5 h-1.5 rounded-full ${privacyEnabled === false ? "bg-[#f7931a]" : "bg-[#555]"}`} />
+            {privacyLoading ? "…" : privacyEnabled === null ? "Privacy" : privacyEnabled ? "Private" : "Public"}
           </button>
           <select
             value={network}
             onChange={(e) => switchNetwork(e.target.value)}
             disabled={connectLoading}
-            style={{ background: "#111", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, color: "#888", fontSize: 11, fontWeight: 600, padding: "6px 10px", outline: "none", cursor: "pointer", fontFamily: "inherit" }}
+            className="bg-[#111] border border-[rgba(255,255,255,0.08)] rounded text-[#888] text-[0.7rem] font-semibold px-2.5 py-1.5 outline-none cursor-pointer disabled:opacity-50"
           >
             <option value="MAINNET">Mainnet</option>
             <option value="REGTEST">Regtest</option>
           </select>
           {privacyStatus.msg && (
-            <span style={{ fontSize: 10, color: privacyStatus.type === "err" ? "#ef4444" : privacyStatus.type === "ok" ? "#22c55e" : "#888" }}>
+            <span className={`text-[0.625rem] ${privacyStatus.type === "err" ? "text-[#ef4444]" : privacyStatus.type === "ok" ? "text-[#22c55e]" : "text-[#888]"}`}>
               {privacyStatus.msg}
             </span>
           )}
           <button
             onClick={disconnect}
-            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 700, color: "#ef4444", cursor: "pointer" }}
+            className="bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.2)] rounded px-3.5 py-1.5 text-[0.7rem] font-bold text-[#ef4444] hover:bg-[rgba(239,68,68,0.12)] transition-colors"
           >
             Disconnect
           </button>
         </div>
       </div>
 
-      {/* Top row: Receive + Balance */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20, marginBottom: 20 }}>
-
-        {/* Receive */}
-        <div style={card}>
-          <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 1, background: "linear-gradient(90deg, transparent, rgba(247,147,26,0.3), transparent)" }} />
-          {sectionTitle("Receive", "Address")}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div className="bg-gradient-to-br from-[#141414] to-[#111] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden">
+          <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-[rgba(247,147,26,0.3)] to-transparent" />
+          <SectionTitle text="Receive" badge="Address" />
           <div
             onClick={copyAddress}
-            title="Click to copy"
-            style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 14px", fontSize: 12, wordBreak: "break-all", color: "#aaa", cursor: "pointer", fontFamily: "JetBrains Mono, monospace", lineHeight: 1.6, minHeight: 60 }}
-            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(247,147,26,0.4)"; (e.currentTarget as HTMLDivElement).style.color = "#ddd"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLDivElement).style.color = "#aaa"; }}
+            className="bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(247,147,26,0.4)] hover:text-[#ddd] rounded-xl p-3.5 text-xs font-mono text-[#aaa] cursor-pointer leading-relaxed min-h-14 break-all transition-colors"
           >
             {address || "—"}
           </div>
           <button
             onClick={copyAddress}
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer", width: "100%", marginTop: "auto" }}
+            className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.06)] rounded-xl p-2.5 text-xs font-semibold text-[#888] w-full mt-auto transition-colors"
           >
             Copy Address
           </button>
           <Status msg={copyMsg} type="ok" onDismiss={() => setCopyMsg("")} />
         </div>
 
-        {/* Balance */}
-        <div style={card}>
-          <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 1, background: "linear-gradient(90deg, transparent, rgba(247,147,26,0.3), transparent)" }} />
-          {sectionTitle("Balance", "Auto-refresh 5s")}
-          <div style={{ minWidth: 0, overflow: "hidden" }}>
-            <div style={{ fontSize: 48, fontWeight: 900, background: "linear-gradient(135deg, #f7931a, #e06800)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-2px", lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <div className="bg-gradient-to-br from-[#141414] to-[#111] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden">
+          <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-[rgba(247,147,26,0.3)] to-transparent" />
+          <SectionTitle text="Balance" badge="Auto-refresh 5s" />
+          <div className="min-w-0 overflow-hidden">
+            <div className="text-5xl font-black bg-gradient-to-br from-[#f7931a] to-[#e06800] bg-clip-text text-transparent -tracking-[2px] leading-none overflow-hidden text-ellipsis whitespace-nowrap">
               {balanceSats !== null ? balanceSats.toLocaleString() : "—"}
             </div>
-            {balanceSats !== null && <div style={{ fontSize: 24, fontWeight: 700, color: "#f7931a", opacity: 0.7, marginTop: 2 }}>sats</div>}
-            {balanceSats !== null && <div style={{ fontSize: 13, color: "#555", marginTop: 6, wordBreak: "break-all" }}>{(Number(balanceSats) / 1e8).toFixed(8)} BTC</div>}
+            {balanceSats !== null && <div className="text-2xl font-bold text-[#f7931a] opacity-70 mt-0.5">sats</div>}
+            {balanceSats !== null && <div className="text-sm text-[#555] mt-1.5 break-all">{(Number(balanceSats) / 1e8).toFixed(8)} BTC</div>}
           </div>
           <button
             onClick={() => refreshBalance()}
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer", width: "100%", marginTop: "auto" }}
+            className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.06)] rounded-xl p-2.5 text-xs font-semibold text-[#888] w-full mt-auto transition-colors"
           >
             Refresh Balance
           </button>
@@ -519,52 +498,71 @@ export default function WalletTab() {
         </div>
       </div>
 
-      {/* Middle row: Check Balance + Send */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20, marginBottom: 20 }}>
-
-        {/* Check address balance */}
-        <div style={card}>
-          {sectionTitle("Check Any Balance", "Public")}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={label}>Spark Address</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div className="bg-gradient-to-br from-[#141414] to-[#111] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 flex flex-col gap-4">
+          <SectionTitle text="Check Any Balance" badge="Public" />
+          <div>
+            <label className="block text-[0.7rem] font-bold uppercase tracking-widest text-[#555] mb-2">Spark Address</label>
             <input
-              type="text" placeholder="spark1... or sparkrt1..." value={checkAddr}
+              type="text"
+              placeholder="spark1... or sparkrt1..."
+              value={checkAddr}
               onChange={(e) => setCheckAddr(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && checkAddressBalance()}
-              style={inp}
+              className="w-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.1)] focus:border-[rgba(247,147,26,0.5)] rounded-xl text-[#e0e0e0] text-sm px-3.5 py-2.75 outline-none mb-4 transition-colors"
             />
           </div>
           <button
-            onClick={checkAddressBalance} disabled={checkLoading}
-            style={{ background: checkLoading ? "rgba(247,147,26,0.2)" : "linear-gradient(135deg,#f7931a,#e55a00)", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 800, color: checkLoading ? "#888" : "#000", cursor: "pointer", width: "100%" }}
+            onClick={checkAddressBalance}
+            disabled={checkLoading}
+            className={`rounded-xl p-3 text-sm font-black text-center w-full transition-all ${
+              checkLoading
+                ? "bg-[rgba(247,147,26,0.2)] text-[#888]"
+                : "bg-gradient-to-br from-[#f7931a] to-[#e55a00] text-black hover:opacity-90"
+            }`}
           >
             {checkLoading ? "Checking…" : "Check Balance"}
           </button>
           {checkResult && (
-            <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px", minWidth: 0, overflow: "hidden" }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: "#f7931a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{checkResult.sats.toLocaleString()} <span style={{ fontSize: 14, opacity: 0.7 }}>sats</span></div>
-              <div style={{ fontSize: 12, color: "#555", marginTop: 4, wordBreak: "break-all" }}>{checkResult.btc} BTC · {checkResult.network}</div>
+            <div className="bg-[#0a0a0a] border border-[rgba(255,255,255,0.06)] rounded-xl p-3.5 min-w-0 overflow-hidden">
+              <div className="text-2xl font-black text-[#f7931a] overflow-hidden text-ellipsis whitespace-nowrap">{checkResult.sats.toLocaleString()} <span className="text-sm opacity-70">sats</span></div>
+              <div className="text-xs text-[#555] mt-1 break-all">{checkResult.btc} BTC · {checkResult.network}</div>
             </div>
           )}
           <Status msg={checkStatus.msg} type={(checkStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setCheckStatus({ msg: "", type: "" })} />
         </div>
 
-        {/* Send */}
-        <div style={card}>
-          {sectionTitle("Send Funds", "Transfer")}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={label}>Recipient Address</span>
-            <input type="text" placeholder="spark1... or sparkrt1..." value={sendTo}
-              onChange={(e) => setSendTo(e.target.value)} style={inp} />
+        <div className="bg-gradient-to-br from-[#141414] to-[#111] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6 flex flex-col gap-4">
+          <SectionTitle text="Send Funds" badge="Transfer" />
+          <div>
+            <label className="block text-[0.7rem] font-bold uppercase tracking-widest text-[#555] mb-2">Recipient Address</label>
+            <input
+              type="text"
+              placeholder="spark1... or sparkrt1..."
+              value={sendTo}
+              onChange={(e) => setSendTo(e.target.value)}
+              className="w-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.1)] focus:border-[rgba(247,147,26,0.5)] rounded-xl text-[#e0e0e0] text-sm px-3.5 py-2.75 outline-none mb-4 transition-colors"
+            />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={label}>Amount (sats)</span>
-            <input type="number" placeholder="e.g. 1000" min={1} value={sendSats}
-              onChange={(e) => setSendSats(e.target.value)} style={inp} />
+          <div>
+            <label className="block text-[0.7rem] font-bold uppercase tracking-widest text-[#555] mb-2">Amount (sats)</label>
+            <input
+              type="number"
+              placeholder="e.g. 1000"
+              min={1}
+              value={sendSats}
+              onChange={(e) => setSendSats(e.target.value)}
+              className="w-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.1)] focus:border-[rgba(247,147,26,0.5)] rounded-xl text-[#e0e0e0] text-sm px-3.5 py-2.75 outline-none mb-4 transition-colors"
+            />
           </div>
           <button
-            onClick={send} disabled={sendLoading}
-            style={{ background: sendLoading ? "rgba(34,197,94,0.2)" : "#22c55e", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 800, color: sendLoading ? "#888" : "#000", cursor: "pointer", width: "100%", marginTop: "auto" }}
+            onClick={send}
+            disabled={sendLoading}
+            className={`rounded-xl p-3 text-sm font-black text-center w-full mt-auto transition-all ${
+              sendLoading
+                ? "bg-[rgba(34,197,94,0.2)] text-[#888]"
+                : "bg-[#22c55e] text-black hover:opacity-90"
+            }`}
           >
             {sendLoading ? "Sending…" : "Send"}
           </button>
@@ -572,80 +570,46 @@ export default function WalletTab() {
         </div>
       </div>
 
-      {/* Transaction History */}
-      <div style={{ ...card, gap: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          {sectionTitle("Transaction History", "Auto-refresh 5s")}
+      <div className="bg-gradient-to-br from-[#141414] to-[#111] border border-[rgba(255,255,255,0.08)] rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <SectionTitle text="Transaction History" badge="Auto-refresh 5s" />
           <button
             onClick={() => loadTx({ page: 0, offsets: [0] })}
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 600, color: "#555", cursor: "pointer" }}
+            className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(255,255,255,0.05)] rounded text-[0.7rem] font-semibold text-[#555] px-3 py-1.5 transition-colors"
           >
             Refresh
           </button>
         </div>
 
         {transfers.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "40px 20px", color: "#444", fontSize: 13 }}>No transactions found.</div>
+          <div className="text-center py-10 text-[#444] text-sm">No transactions found.</div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {transfers.map((tx) => {
-              const isIn = tx.direction === "INCOMING";
-              const date = tx.createdAt ? new Date(tx.createdAt).toLocaleString() : "—";
-              const shortId = tx.id ? `${tx.id.slice(0, 18)}…` : "—";
-              const explorerUrl = network === "MAINNET" 
-                ? `https://sparkscan.io/tx/${tx.id}` 
-                : `https://sparkscan.io/tx/${tx.id}?network=regtest`;
-              return (
-                <a 
-                  key={tx.id} 
-                  href={explorerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, textDecoration: "none", transition: "all 0.2s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(247,147,26,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; (e.currentTarget.querySelector(".link-hint") as HTMLElement).style.opacity = "1"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"; e.currentTarget.style.background = "#0a0a0a"; (e.currentTarget.querySelector(".link-hint") as HTMLElement).style.opacity = "0.3"; }}
-                >
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase", padding: "2px 8px", borderRadius: 6, background: isIn ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)", color: isIn ? "#22c55e" : "#ef4444" }}>
-                        {isIn ? "Received" : "Sent"}
-                      </span>
-                      <span style={{ fontSize: 11, color: "#555" }}>{date}</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-                      <span style={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace", color: "#444", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {shortId}
-                      </span>
-                      <svg className="link-hint" style={{ width: 10, height: 10, color: "#666", opacity: 0.3, transition: "all 0.2s", flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: isIn ? "#22c55e" : "#e0e0e0", whiteSpace: "nowrap" }}>
-                    {isIn ? "+" : "−"}{Number(tx.sats).toLocaleString()} <span style={{ fontSize: 11, opacity: 0.6 }}>sats</span>
-                  </span>
-                </a>
-              );
-            })}
+          <div className="flex flex-col gap-2 mb-4">
+            {transfers.map((tx) => (
+              <TransactionRow key={tx.id} tx={tx} network={network} onCopyId={copyTxId} />
+            ))}
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
+        <div className="flex items-center justify-between mt-4">
           <button
             disabled={txPage === 0}
             onClick={() => loadTx({ page: txPage - 1, offsets: txOffsets })}
-            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "6px 18px", fontSize: 12, fontWeight: 600, color: txPage === 0 ? "#333" : "#666", cursor: txPage === 0 ? "default" : "pointer" }}
-          >← Prev</button>
-          <span style={{ fontSize: 11, color: "#444" }}>Page {txPage + 1}</span>
+            className="bg-transparent border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.03)] rounded px-4 py-1.5 text-xs font-semibold text-[#666] disabled:text-[#333] disabled:cursor-not-allowed transition-colors"
+          >
+            ← Prev
+          </button>
+          <span className="text-[0.7rem] text-[#444]">Page {txPage + 1}</span>
           <button
             disabled={!txHasNext}
             onClick={() => loadTx({ page: txPage + 1, offsets: txOffsets })}
-            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "6px 18px", fontSize: 12, fontWeight: 600, color: !txHasNext ? "#333" : "#666", cursor: !txHasNext ? "default" : "pointer" }}
-          >Next →</button>
+            className="bg-transparent border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.03)] rounded px-4 py-1.5 text-xs font-semibold text-[#666] disabled:text-[#333] disabled:cursor-not-allowed transition-colors"
+          >
+            Next →
+          </button>
         </div>
         <Status msg={txStatus.msg} type={(txStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setTxStatus({ msg: "", type: "" })} />
       </div>
-
     </div>
   );
 }
