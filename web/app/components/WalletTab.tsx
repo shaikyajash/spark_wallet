@@ -67,6 +67,20 @@ export default function WalletTab() {
   const refreshInFlight = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Load Spark address from environment on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const config = await api("/api/config", {}, 0);
+        if (config?.sparkOwner) {
+          setCheckAddr(config.sparkOwner);
+        }
+      } catch (e) {
+        console.error("Failed to load config:", e);
+      }
+    })();
+  }, []);
+
   const refreshBalance = useCallback(async (silent = false) => {
     if (!silent) setBalanceStatus({ msg: "Fetching balance…", type: "info" });
     try {
