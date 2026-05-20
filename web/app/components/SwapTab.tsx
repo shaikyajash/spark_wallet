@@ -208,23 +208,28 @@ export default function SwapTab() {
   useEffect(() => {
     (async () => {
       let s = load();
-      // Auto-load EVM_RPC_URL and Spark address from server env
+      // Auto-load EVM_RPC_URL from env, and Spark address from connected wallet session
       try {
-        const envConfig = await fetch("/api/config").then(r => r.json());
+        const [envConfig, status] = await Promise.all([
+          fetch("/api/config").then(r => r.json()),
+          fetch("/api/status").then(r => r.json()),
+        ]);
         let changed = false;
         if (envConfig?.evmRpcUrl && !s.evmRpcUrl) {
           s.evmRpcUrl = envConfig.evmRpcUrl;
           changed = true;
         }
-        if (envConfig?.sparkOwner && !s.sparkAddress) {
-          s.sparkAddress = envConfig.sparkOwner;
+        // Always sync Spark address from connected wallet; fall back to SPARK_OWNER env
+        const sparkAddr = status?.address || envConfig?.sparkOwner;
+        if (sparkAddr && s.sparkAddress !== sparkAddr) {
+          s.sparkAddress = sparkAddr;
           changed = true;
         }
         if (changed) {
           localStorage.setItem(KEY, JSON.stringify(s));
         }
       } catch (e) {
-        console.error("Failed to load config from env:", e);
+        console.error("Failed to load config:", e);
       }
       setConfig(s);
       cfgRef.current = s;
