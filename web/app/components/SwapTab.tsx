@@ -133,7 +133,8 @@ function ManualActionPanel({ action, onClose }: { action: ManualAction; onClose:
 export default function SwapTab() {
   const [config,setConfig] = useState<SwapConfig>(EMPTY);
   const [showConfig,setShowConfig] = useState(false);
-  const [envText,setEnvText] = useState("");
+  const [connectingMM, setConnectingMM] = useState(false);
+  const [mmError, setMMError] = useState("");
   const [manualAction,setManualAction] = useState<ManualAction|null>(null);
   const [assets,setAssets] = useState<Asset[]>([]);
   const [assetsLoading,setAssetsLoading] = useState(false);
@@ -434,157 +435,70 @@ export default function SwapTab() {
       </div>
 
       {/* Config Panel */}
-      {showConfig && (() => {
-        const importEnv = () => {
-          const p = parseEnv(envText);
-          if (Object.keys(p).length === 0) return;
-          const u = { ...config, ...p };
-          setConfig(u); saveConfig(u); loadAssets(u); setEnvText("");
-        };
-        const fields = [
-          { ph: "EVM Address", env: "EVM_OWNER", val: config.evmAddress, key: "evmAddress" as const, required: true },
-          { ph: "EVM Private Key", env: "EVM_PRIVATE_KEY", val: config.evmPrivateKey, key: "evmPrivateKey" as const, pwd: true, required: true },
-        ];
-        return (
-          <div style={{ background: "linear-gradient(160deg, #131313, #0c0c0c)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.4)" }}>
-            {/* Header */}
-            <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(247,147,26,0.03)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(247,147,26,0.12)", border: "1px solid rgba(247,147,26,0.25)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f7931a", fontSize: 13, fontWeight: 800 }}>⚙</div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>Signer Configuration</div>
-                  <div style={{ fontSize: 10, color: "#555", marginTop: 1 }}>Staging URLs & app ID are baked in</div>
-                </div>
-              </div>
-              <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "1.3px", textTransform: "uppercase", color: "#f7931a", background: "rgba(247,147,26,0.08)", border: "1px solid rgba(247,147,26,0.2)", padding: "4px 9px", borderRadius: 999 }}>Local-only</span>
-            </div>
-
-            {/* Body */}
-            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 18 }}>
-              {/* Env import block */}
+      {showConfig && (
+        <div style={{ background: "linear-gradient(160deg, #131313, #0c0c0c)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.4)" }}>
+          <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(247,147,26,0.03)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(247,147,26,0.12)", border: "1px solid rgba(247,147,26,0.25)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f7931a", fontSize: 13, fontWeight: 800 }}>🦊</div>
               <div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1.3px", textTransform: "uppercase", color: "#666" }}>Quick Import</span>
-                  <span style={{ fontSize: 10, color: "#444" }}>Paste your <code style={{ background: "#0a0a0a", padding: "1px 5px", borderRadius: 4, color: "#888", fontFamily: "JetBrains Mono,monospace" }}>.env</code> contents</span>
-                </div>
-                <div style={{ position: "relative" }}>
-                  <textarea
-                    placeholder={"EVM_PRIVATE_KEY=0x…\nEVM_OWNER=0x…"}
-                    rows={5}
-                    value={envText}
-                    onChange={e => setEnvText(e.target.value)}
-                    style={{
-                      width: "100%",
-                      background: "#070707",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      borderRadius: 12,
-                      color: "#e0e0e0",
-                      fontFamily: "JetBrains Mono, monospace",
-                      fontSize: 11,
-                      lineHeight: 1.65,
-                      padding: "12px 14px",
-                      outline: "none",
-                      resize: "vertical",
-                      minHeight: 110,
-                      boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4)",
-                    }}
-                    onFocus={e => (e.currentTarget.style.borderColor = "rgba(247,147,26,0.4)")}
-                    onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)")}
-                  />
-                  <button
-                    onClick={importEnv}
-                    disabled={!envText.trim()}
-                    style={{
-                      position: "absolute",
-                      right: 10,
-                      bottom: 10,
-                      background: envText.trim() ? "linear-gradient(135deg, #f7931a, #e55a00)" : "rgba(255,255,255,0.05)",
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "7px 14px",
-                      fontSize: 11,
-                      fontWeight: 800,
-                      color: envText.trim() ? "#000" : "#555",
-                      cursor: envText.trim() ? "pointer" : "default",
-                      letterSpacing: "0.3px",
-                      boxShadow: envText.trim() ? "0 2px 8px rgba(247,147,26,0.3)" : "none",
-                    }}
-                  >
-                    Parse →
-                  </button>
-                </div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>Connect Signer</div>
+                <div style={{ fontSize: 10, color: "#555", marginTop: 1 }}>MetaMask required for EVM swaps</div>
               </div>
-
-              {/* Divider */}
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1.5px", color: "#333", textTransform: "uppercase" }}>or fill manually</span>
-                <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
-              </div>
-
-              {/* Manual fields */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {fields.map(f => (
-                  <div key={f.key}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: "#888", letterSpacing: "0.3px" }}>{f.ph}</span>
-                      <span style={{ fontSize: 9, fontFamily: "JetBrains Mono,monospace", color: f.required ? "#f7931a" : "#444", background: f.required ? "rgba(247,147,26,0.06)" : "transparent", padding: "2px 6px", borderRadius: 4 }}>
-                        {f.env}{f.required ? "" : " · optional"}
-                      </span>
-                    </div>
-                    <input
-                      type={f.pwd ? "password" : "text"}
-                      placeholder={f.pwd ? "0x…" : f.env.startsWith("EVM_RPC") ? "https://…" : f.env.startsWith("SPARK") ? "spark1…" : "0x…"}
-                      value={f.val}
-                      onChange={e => setConfig({ ...config, [f.key]: e.target.value })}
-                      style={{
-                        width: "100%",
-                        background: "#070707",
-                        border: `1px solid ${f.required && !f.val ? "rgba(247,147,26,0.15)" : "rgba(255,255,255,0.07)"}`,
-                        borderRadius: 10,
-                        color: "#e0e0e0",
-                        fontFamily: f.pwd ? "JetBrains Mono,monospace" : "inherit",
-                        fontSize: 12,
-                        padding: "10px 12px",
-                        outline: "none",
-                      }}
-                      onFocus={e => (e.currentTarget.style.borderColor = "rgba(247,147,26,0.4)")}
-                      onBlur={e => (e.currentTarget.style.borderColor = f.required && !f.val ? "rgba(247,147,26,0.15)" : "rgba(255,255,255,0.07)")}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Save */}
-              <button
-                onClick={() => { saveConfig(config); loadAssets(config); setShowConfig(false); }}
-                disabled={!config.evmAddress || !config.evmPrivateKey}
-                style={{
-                  background: (!config.evmAddress || !config.evmPrivateKey) ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #f7931a, #e55a00)",
-                  border: "none",
-                  borderRadius: 12,
-                  padding: "13px",
-                  fontSize: 13,
-                  fontWeight: 800,
-                  color: (!config.evmAddress || !config.evmPrivateKey) ? "#555" : "#000",
-                  cursor: (!config.evmAddress || !config.evmPrivateKey) ? "default" : "pointer",
-                  letterSpacing: "0.3px",
-                  boxShadow: (!config.evmAddress || !config.evmPrivateKey || !config.evmRpcUrl) ? "none" : "0 4px 16px rgba(247,147,26,0.25)",
-                }}
-              >
-                Save &amp; Connect
-              </button>
-            </div>
-
-            {/* Footer pinned info */}
-            <div style={{ padding: "10px 20px", borderTop: "1px solid rgba(255,255,255,0.04)", background: "rgba(0,0,0,0.3)", fontSize: 10, color: "#444", fontFamily: "JetBrains Mono,monospace", lineHeight: 1.6, wordBreak: "break-all" }}>
-              <div><span style={{ color: "#666" }}>GARDEN_BASE_URL</span> = <span style={{ color: "#555" }}>{STAGING.baseUrl.replace(/^https?:\/\//, "")}</span></div>
-              <div><span style={{ color: "#666" }}>ORDERBOOK_BASE_URL</span> = <span style={{ color: "#555" }}>{STAGING.orderbookUrl.replace(/^https?:\/\//, "")}</span></div>
-              <div><span style={{ color: "#666" }}>GARDEN_APP_ID</span> = <span style={{ color: "#555" }}>{STAGING.appId.slice(0, 8)}…{STAGING.appId.slice(-8)}</span></div>
             </div>
           </div>
-        );
-      })()}
+
+          <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+            {mmError && (
+              <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "#ef4444" }}>
+                {mmError}
+              </div>
+            )}
+            <button
+              onClick={async () => {
+                setConnectingMM(true);
+                setMMError("");
+                try {
+                  if (!(window as any).ethereum) {
+                    throw new Error("MetaMask not found. Please install MetaMask");
+                  }
+                  const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+                  const cfg = { ...config, evmAddress: accounts[0] };
+                  setConfig(cfg);
+                  saveConfig(cfg);
+                  loadAssets(cfg);
+                  setShowConfig(false);
+                } catch (e: unknown) {
+                  setMMError(e instanceof Error ? e.message : String(e));
+                } finally {
+                  setConnectingMM(false);
+                }
+              }}
+              disabled={connectingMM}
+              style={{
+                width: "100%",
+                background: connectingMM ? "rgba(247,147,26,0.3)" : "linear-gradient(135deg, #f7931a, #e55a00)",
+                border: "none",
+                borderRadius: 12,
+                padding: "16px",
+                fontSize: 15,
+                fontWeight: 800,
+                color: connectingMM ? "#888" : "#000",
+                cursor: connectingMM ? "default" : "pointer",
+                letterSpacing: "0.3px",
+                boxShadow: connectingMM ? "none" : "0 4px 16px rgba(247,147,26,0.25)",
+              }}
+            >
+              {connectingMM ? "Connecting..." : "Connect MetaMask"}
+            </button>
+
+            <div style={{ padding: "12px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 10, fontSize: 11, color: "#666", lineHeight: 1.6 }}>
+              <div style={{ marginBottom: 6 }}>✓ Spark address loads automatically</div>
+              <div style={{ marginBottom: 6 }}>✓ RPC URL pre-configured</div>
+              <div>✓ No private keys needed</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Swap Box */}
       <div style={{ background:"rgba(20,20,20,0.7)",backdropFilter:"blur(24px)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:24,padding:8,position:"relative",overflow:"hidden",boxShadow:"0 16px 40px rgba(0,0,0,0.5)" }}>
