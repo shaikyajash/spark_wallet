@@ -439,10 +439,16 @@ export default function SwapTab() {
         <div style={{ background: "linear-gradient(160deg, #131313, #0c0c0c)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.4)" }}>
           <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(247,147,26,0.03)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(247,147,26,0.12)", border: "1px solid rgba(247,147,26,0.25)", display: "flex", alignItems: "center", justifyContent: "center", color: "#f7931a", fontSize: 13, fontWeight: 800 }}>🦊</div>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: config.evmAddress ? "rgba(34,197,94,0.12)" : "rgba(247,147,26,0.12)", border: `1px solid ${config.evmAddress ? "rgba(34,197,94,0.25)" : "rgba(247,147,26,0.25)"}`, display: "flex", alignItems: "center", justifyContent: "center", color: config.evmAddress ? "#22c55e" : "#f7931a", fontSize: 13, fontWeight: 800 }}>
+                {config.evmAddress ? "✓" : "🦊"}
+              </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>Connect Signer</div>
-                <div style={{ fontSize: 10, color: "#555", marginTop: 1 }}>MetaMask required for EVM swaps</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#f0f0f0" }}>
+                  {config.evmAddress ? "MetaMask Connected" : "Connect Signer"}
+                </div>
+                <div style={{ fontSize: 10, color: "#555", marginTop: 1 }}>
+                  {config.evmAddress ? `${config.evmAddress.slice(0, 6)}...${config.evmAddress.slice(-4)}` : "MetaMask required for EVM swaps"}
+                </div>
               </div>
             </div>
           </div>
@@ -453,46 +459,101 @@ export default function SwapTab() {
                 {mmError}
               </div>
             )}
-            <button
-              onClick={async () => {
-                setConnectingMM(true);
-                setMMError("");
-                try {
-                  if (!(window as any).ethereum) {
-                    throw new Error("MetaMask not found. Please install MetaMask");
+            {!config.evmAddress ? (
+              <button
+                onClick={async () => {
+                  setConnectingMM(true);
+                  setMMError("");
+                  try {
+                    if (!(window as any).ethereum) {
+                      throw new Error("MetaMask not found. Please install MetaMask");
+                    }
+                    const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+                    const cfg = { ...config, evmAddress: accounts[0] };
+                    setConfig(cfg);
+                    saveConfig(cfg);
+                    loadAssets(cfg);
+                  } catch (e: unknown) {
+                    setMMError(e instanceof Error ? e.message : String(e));
+                  } finally {
+                    setConnectingMM(false);
                   }
-                  const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-                  const cfg = { ...config, evmAddress: accounts[0] };
+                }}
+                disabled={connectingMM}
+                style={{
+                  width: "100%",
+                  background: connectingMM ? "rgba(247,147,26,0.3)" : "linear-gradient(135deg, #f7931a, #e55a00)",
+                  border: "none",
+                  borderRadius: 12,
+                  padding: "16px",
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: connectingMM ? "#888" : "#000",
+                  cursor: connectingMM ? "default" : "pointer",
+                  letterSpacing: "0.3px",
+                  boxShadow: connectingMM ? "none" : "0 4px 16px rgba(247,147,26,0.25)",
+                }}
+              >
+                {connectingMM ? "Connecting..." : "Connect MetaMask"}
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowConfig(false)}
+                style={{
+                  width: "100%",
+                  background: "rgba(34,197,94,0.1)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  borderRadius: 12,
+                  padding: "16px",
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: "#22c55e",
+                  cursor: "pointer",
+                  letterSpacing: "0.3px",
+                }}
+              >
+                ✓ Close
+              </button>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#888" }}>
+                Spark Address
+              </label>
+              <input
+                type="text"
+                value={config.sparkAddress}
+                onChange={(e) => {
+                  const cfg = { ...config, sparkAddress: e.target.value };
                   setConfig(cfg);
                   saveConfig(cfg);
-                  loadAssets(cfg);
-                  setShowConfig(false);
-                } catch (e: unknown) {
-                  setMMError(e instanceof Error ? e.message : String(e));
-                } finally {
-                  setConnectingMM(false);
-                }
-              }}
-              disabled={connectingMM}
-              style={{
-                width: "100%",
-                background: connectingMM ? "rgba(247,147,26,0.3)" : "linear-gradient(135deg, #f7931a, #e55a00)",
-                border: "none",
-                borderRadius: 12,
-                padding: "16px",
-                fontSize: 15,
-                fontWeight: 800,
-                color: connectingMM ? "#888" : "#000",
-                cursor: connectingMM ? "default" : "pointer",
-                letterSpacing: "0.3px",
-                boxShadow: connectingMM ? "none" : "0 4px 16px rgba(247,147,26,0.25)",
-              }}
-            >
-              {connectingMM ? "Connecting..." : "Connect MetaMask"}
-            </button>
+                }}
+                placeholder="sparkrt1... (loads automatically)"
+                style={{
+                  background: "rgba(0,0,0,0.4)",
+                  border: `1px solid ${sparkAddressValid && config.sparkAddress ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.1)"}`,
+                  borderRadius: 10,
+                  padding: "12px 14px",
+                  fontSize: 12,
+                  color: "#f0f0f0",
+                  fontFamily: "JetBrains Mono, monospace",
+                  outline: "none",
+                  wordBreak: "break-all",
+                }}
+              />
+              {config.sparkAddress && !isValidSparkAddress(config.sparkAddress.trim()) && (
+                <div style={{ fontSize: 11, color: "#ef4444" }}>
+                  ✗ Invalid Spark address format
+                </div>
+              )}
+              {config.sparkAddress && isValidSparkAddress(config.sparkAddress.trim()) && (
+                <div style={{ fontSize: 11, color: "#22c55e" }}>
+                  ✓ Valid Spark address
+                </div>
+              )}
+            </div>
 
             <div style={{ padding: "12px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 10, fontSize: 11, color: "#666", lineHeight: 1.6 }}>
-              <div style={{ marginBottom: 6 }}>✓ Spark address loads automatically</div>
               <div style={{ marginBottom: 6 }}>✓ RPC URL pre-configured</div>
               <div>✓ No private keys needed</div>
             </div>
