@@ -206,17 +206,22 @@ export default function SwapTab() {
 
   useEffect(() => {
     (async () => {
-      const s = load();
+      let s = load();
       // Auto-load EVM_RPC_URL and Spark address from server env
       try {
         const envConfig = await fetch("/api/config").then(r => r.json());
+        let changed = false;
         if (envConfig?.evmRpcUrl && !s.evmRpcUrl) {
           s.evmRpcUrl = envConfig.evmRpcUrl;
+          changed = true;
         }
         if (envConfig?.sparkOwner && !s.sparkAddress) {
           s.sparkAddress = envConfig.sparkOwner;
+          changed = true;
         }
-        localStorage.setItem(KEY, JSON.stringify(s));
+        if (changed) {
+          localStorage.setItem(KEY, JSON.stringify(s));
+        }
       } catch (e) {
         console.error("Failed to load config from env:", e);
       }
