@@ -573,7 +573,7 @@ export default function SwapTab() {
         <div style={{ background:"var(--surface)",border:"1px solid var(--border)",borderRadius:20,padding:"20px 20px 16px", minWidth: 0 }}>
           <div style={{ display:"flex",justifyContent:"space-between",marginBottom:12, flexWrap: "wrap", gap: 4 }}>
             <span style={{ fontSize:11,fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",color:"var(--text-muted)" }}>Sell</span>
-            {fromInfo && <span style={{ fontSize:11,color:"var(--text-faint)", wordBreak: "break-all" }}>Min: {(() => { const amt = Number(fromInfo.minAmount) / Math.pow(10, fromInfo.decimals); return amt.toLocaleString(undefined, { maximumFractionDigits: fromInfo.decimals }).replace(/\.0+$/,''); })()} {fromInfo.id.split(":")[1].toUpperCase()}</span>}
+            {fromInfo && <span style={{ fontSize:11,color:"var(--text-faint)", wordBreak: "break-all" }}>Min: {fromBaseUnits(fromInfo.minAmount, fromInfo.decimals)} {fromInfo.id.split(":")[1].toUpperCase()}</span>}
           </div>
           <div style={{ display:"flex",alignItems:"center",gap:12 }}>
             <input type="text" inputMode="decimal" placeholder="0.00" value={amount} onChange={e=>{const v=e.target.value;if(v===""||/^\d*\.?\d*$/.test(v)){setAmount(v);setQuoteErr("");}}}
