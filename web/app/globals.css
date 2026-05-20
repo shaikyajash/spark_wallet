@@ -2,30 +2,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080808;
-  --surface: #0f0f0f;
-  --surface-2: #141414;
-  --surface-3: #1a1a1a;
-  --border: rgba(255,255,255,0.06);
-  --border-2: rgba(255,255,255,0.1);
-  --text: #f0f0f0;
-  --text-muted: #888;
-  --text-faint: #444;
-  --orange: #f7931a;
-  --orange-dim: rgba(247,147,26,0.1);
-  --orange-border: rgba(247,147,26,0.2);
-  --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.1);
-  --green-border: rgba(34,197,94,0.2);
-  --blue: #3b82f6;
-  --red: #ef4444;
-  --purple: #a855f7;
+  --background: #0f1014;
+  --surface: #141618;
+  --surface-2: #1a1d22;
+  --surface-3: #21252d;
+  --border: rgba(255,255,255,0.07);
+  --border-2: rgba(255,255,255,0.12);
+  --text: #dde1ea;
+  --text-muted: #7a7f90;
+  --text-faint: #464c5e;
+  --orange: #e8902a;
+  --orange-dim: rgba(232,144,42,0.1);
+  --orange-border: rgba(232,144,42,0.22);
+  --green: #34c96a;
+  --green-dim: rgba(52,201,106,0.1);
+  --green-border: rgba(52,201,106,0.22);
+  --blue: #4f8ef7;
+  --red: #e85555;
+  --purple: #a06fe0;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: radial-gradient(circle at 50% 0%, rgba(247, 147, 26, 0.03) 0%, var(--background) 50%);
+  background: radial-gradient(circle at 50% 0%, rgba(232, 144, 42, 0.04) 0%, var(--background) 55%);
   background-attachment: fixed;
   color: var(--text);
   font-family: 'Inter', system-ui, sans-serif;
@@ -36,8 +36,8 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
+::-webkit-scrollbar-thumb { background: #2e323c; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #454a58; }
 
 /* Override global input styles for swap — individual components use their own */
 input[type="number"]::-webkit-inner-spin-button,
@@ -52,15 +52,15 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 .animate-slide-in { animation: slideIn 0.2s ease; }
 
 .skeleton {
-  background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+  background: linear-gradient(90deg, #1a1d22 25%, #21252d 50%, #1a1d22 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 6px;
 }
 
 /* Chain icon gradient colors */
-.chain-btc { background: linear-gradient(135deg, #f7931a, #e67e00); }
+.chain-btc { background: linear-gradient(135deg, #e8902a, #c97318); }
 .chain-eth { background: linear-gradient(135deg, #627EEA, #3b5bd5); }
 .chain-arb { background: linear-gradient(135deg, #28a0f0, #1a7abf); }
-.chain-spark { background: linear-gradient(135deg, #f7931a, #ff6b35); }
-.chain-default { background: linear-gradient(135deg, #3a3a3a, #222); }
+.chain-spark { background: linear-gradient(135deg, #e8902a, #d45f20); }
+.chain-default { background: linear-gradient(135deg, #2e323c, #1a1d22); }
