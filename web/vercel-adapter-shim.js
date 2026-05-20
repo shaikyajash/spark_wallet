@@ -26,26 +26,33 @@ const adapter = {
   async onBuildComplete(ctx) {
     const { distDir } = ctx;
 
-    // Generate the deterministic manifest before Vercel's adapter runs.
+    // Read routes-manifest.json BEFORE Vercel's adapter runs — it may move/delete distDir.
+    let deterministicContent;
     try {
-      const src = path.join(distDir, 'routes-manifest.json');
-      const manifest = JSON.parse(fs.readFileSync(src, 'utf8'));
+      const manifest = JSON.parse(fs.readFileSync(path.join(distDir, 'routes-manifest.json'), 'utf8'));
       const sort = (o) =>
         Array.isArray(o) ? o.map(sort) :
         o && typeof o === 'object'
           ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sort(o[k])]))
           : o;
-      fs.writeFileSync(
-        path.join(distDir, 'routes-manifest-deterministic.json'),
-        JSON.stringify(sort(manifest))
-      );
+      deterministicContent = JSON.stringify(sort(manifest));
     } catch (e) {
-      console.warn('[vercel-shim] could not write routes-manifest-deterministic.json:', e.message);
+      console.warn('[vercel-shim] could not read routes-manifest.json:', e.message);
     }
 
     const vercel = await getVercelAdapter();
     if (vercel?.onBuildComplete) {
       await vercel.onBuildComplete(ctx);
+    }
+
+    // Write AFTER Vercel's adapter so it survives any cleanup Vercel's adapter does.
+    if (deterministicContent) {
+      try {
+        fs.mkdirSync(distDir, { recursive: true });
+        fs.writeFileSync(path.join(distDir, 'routes-manifest-deterministic.json'), deterministicContent);
+      } catch (e) {
+        console.warn('[vercel-shim] could not write routes-manifest-deterministic.json:', e.message);
+      }
     }
   },
 };
