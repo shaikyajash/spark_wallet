@@ -607,23 +607,23 @@ export default function SwapTab() {
       )}
 
       {/* Swap Box */}
-      <div style={{ background:"rgba(20,20,20,0.7)",backdropFilter:"blur(24px)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:24,padding:8,position:"relative",overflow:"hidden",boxShadow:"0 16px 40px rgba(0,0,0,0.5)" }}>
-        <div style={{ position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,transparent,rgba(247,147,26,0.5),transparent)" }} />
+      <div style={{ background:"var(--surface-2)",border:"1px solid var(--border-2)",borderRadius:24,padding:8,position:"relative",overflow:"hidden",boxShadow:"0 12px 36px rgba(0,0,0,0.4)" }}>
+        <div style={{ position:"absolute",top:0,left:0,right:0,height:1,background:"linear-gradient(90deg,transparent,rgba(240,137,58,0.4),transparent)" }} />
 
         {/* From */}
-        <div style={{ background:"rgba(0,0,0,0.4)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:20,padding:"20px 20px 16px",boxShadow:"inset 0 2px 10px rgba(0,0,0,0.2)", minWidth: 0 }}>
+        <div style={{ background:"var(--surface)",border:"1px solid var(--border)",borderRadius:20,padding:"20px 20px 16px", minWidth: 0 }}>
           <div style={{ display:"flex",justifyContent:"space-between",marginBottom:12, flexWrap: "wrap", gap: 4 }}>
-            <span style={{ fontSize:11,fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",color:"#555" }}>Sell</span>
-            {fromInfo && <span style={{ fontSize:11,color:"#444", wordBreak: "break-all" }}>Min: {(() => { const amt = Number(fromInfo.minAmount) / Math.pow(10, fromInfo.decimals); return amt.toLocaleString(undefined, { maximumFractionDigits: fromInfo.decimals }).replace(/\.0+$/,''); })()} {fromInfo.id.split(":")[1].toUpperCase()}</span>}
+            <span style={{ fontSize:11,fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",color:"var(--text-muted)" }}>Sell</span>
+            {fromInfo && <span style={{ fontSize:11,color:"var(--text-faint)", wordBreak: "break-all" }}>Min: {(() => { const amt = Number(fromInfo.minAmount) / Math.pow(10, fromInfo.decimals); return amt.toLocaleString(undefined, { maximumFractionDigits: fromInfo.decimals }).replace(/\.0+$/,''); })()} {fromInfo.id.split(":")[1].toUpperCase()}</span>}
           </div>
           <div style={{ display:"flex",alignItems:"center",gap:12 }}>
             <input type="text" inputMode="decimal" placeholder="0.00" value={amount} onChange={e=>{const v=e.target.value;if(v===""||/^\d*\.?\d*$/.test(v)){setAmount(v);setQuoteErr("");}}}
-              style={{ background:"transparent",border:"none",outline:"none",fontSize:28,fontWeight:800,color:amount?"#f0f0f0":"#2a2a2a",width:"100%",fontFamily:"inherit", minWidth: 0 }} />
+              style={{ background:"transparent",border:"none",outline:"none",fontSize:28,fontWeight:800,color:amount?"var(--text)":"var(--text-faint)",width:"100%",fontFamily:"inherit", minWidth: 0 }} />
             {assetsLoading ? (
-              <div style={{ width:110,height:40,borderRadius:12,background:"#1a1a1a", flexShrink: 0 }} />
+              <div style={{ width:110,height:40,borderRadius:12,background:"var(--surface-2)", flexShrink: 0 }} />
             ) : (
               <select value={fromAsset} onChange={e=>{const next=e.target.value;if(next!==fromAsset){setFromAsset(next);setQuoteErr("");}}}
-                style={{ background:"#1a1a1a",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,color:"#f0f0f0",fontSize:13,fontWeight:700,padding:"8px 12px",outline:"none",cursor:"pointer",minWidth:120, flexShrink: 0 }}>
+                style={{ background:"var(--surface-2)",border:"1px solid var(--border-2)",borderRadius:12,color:"var(--text)",fontSize:13,fontWeight:600,padding:"8px 12px",outline:"none",cursor:"pointer",minWidth:120, flexShrink: 0 }}>
                 {assets.map(a=><option key={a.id} value={a.id}>{a.id.split(":")[1]?.toUpperCase()||a.id} ({a.chain})</option>)}
               </select>
             )}
@@ -641,19 +641,19 @@ export default function SwapTab() {
         </div>
 
         {/* To */}
-        <div style={{ background:"rgba(0,0,0,0.4)",border:"1px solid rgba(255,255,255,0.03)",borderRadius:20,padding:"20px 20px 16px",boxShadow:"inset 0 2px 10px rgba(0,0,0,0.2)", minWidth: 0 }}>
+        <div style={{ background:"var(--surface)",border:"1px solid var(--border)",borderRadius:20,padding:"20px 20px 16px", minWidth: 0 }}>
           <div style={{ display:"flex",justifyContent:"space-between",marginBottom:12 }}>
-            <span style={{ fontSize:11,fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",color:"#555" }}>Buy</span>
+            <span style={{ fontSize:11,fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",color:"var(--text-muted)" }}>Buy</span>
           </div>
           <div style={{ display:"flex",alignItems:"center",gap:12 }}>
-            <div style={{ fontSize:28,fontWeight:800,color:quote?"#22c55e":"#2a2a2a",width:"100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+            <div style={{ fontSize:28,fontWeight:800,color:quote?"var(--green)":"var(--text-faint)",width:"100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
               {quote ? (toInfo ? fromBaseUnits(quote.destination.amount, toInfo.decimals) : quote.destination.amount) : (quoteLoading ? "…" : "0.00")}
             </div>
             {assetsLoading ? (
-              <div style={{ width:110,height:40,borderRadius:12,background:"#1a1a1a", flexShrink: 0 }} />
+              <div style={{ width:110,height:40,borderRadius:12,background:"var(--surface-2)", flexShrink: 0 }} />
             ) : (
               <select value={toAsset} onChange={e=>{const next=e.target.value;if(next!==toAsset){setToAsset(next);setQuoteErr("");}}}
-                style={{ background:"#1a1a1a",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,color:"#f0f0f0",fontSize:13,fontWeight:700,padding:"8px 12px",outline:"none",cursor:"pointer",minWidth:120, flexShrink: 0 }}>
+                style={{ background:"var(--surface-2)",border:"1px solid var(--border-2)",borderRadius:12,color:"var(--text)",fontSize:13,fontWeight:600,padding:"8px 12px",outline:"none",cursor:"pointer",minWidth:120, flexShrink: 0 }}>
                 {assets.map(a=><option key={a.id} value={a.id}>{a.id.split(":")[1]?.toUpperCase()||a.id} ({a.chain})</option>)}
               </select>
             )}
@@ -671,7 +671,7 @@ export default function SwapTab() {
           )}
 
           {quote && (
-            <div style={{ marginBottom:10,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:14,padding:"14px 16px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10 }}>
+            <div style={{ marginBottom:10,background:"var(--surface)",border:"1px solid var(--border)",borderRadius:14,padding:"14px 16px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10 }}>
               {[
                 { label:"Market Maker", val:quote.solver_id },
                 { label:"Protocol Fee", val:`${quote.fee} bips` },
@@ -679,14 +679,14 @@ export default function SwapTab() {
                 { label:"Route", val:`${fromAsset.split(":")[1]?.toUpperCase()} → ${toAsset.split(":")[1]?.toUpperCase()}` },
               ].map(r=>(
                 <div key={r.label} style={{ display:"flex",flexDirection:"column",gap:3 }}>
-                  <span style={{ fontSize:9,fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",color:"#444" }}>{r.label}</span>
-                  <span style={{ fontSize:12,fontWeight:700,color:"#aaa" }}>{r.val}</span>
+                  <span style={{ fontSize:9,fontWeight:700,letterSpacing:"1px",textTransform:"uppercase",color:"var(--text-faint)" }}>{r.label}</span>
+                  <span style={{ fontSize:12,fontWeight:600,color:"var(--text-muted)" }}>{r.val}</span>
                 </div>
               ))}
             </div>
           )}
           <button onClick={executeSwap} disabled={!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid}
-            style={{ width:"100%",background:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"rgba(255,255,255,0.05)":"#22c55e",boxShadow:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"none":"0 4px 15px rgba(34,197,94,0.3)",border:"none",borderRadius:18,padding:"16px",fontSize:15,fontWeight:800,color:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"#555":"#000",cursor:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"default":"pointer",transition:"all 0.2s" }}>
+            style={{ width:"100%",background:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"var(--surface-3)":"linear-gradient(135deg, #2dd36e, #1aaa52)",boxShadow:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"none":"0 4px 16px rgba(45,211,110,0.25)",border:"1px solid",borderColor:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"var(--border)":"rgba(45,211,110,0.3)",borderRadius:18,padding:"16px",fontSize:15,fontWeight:700,color:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"var(--text-faint)":"#fff",cursor:(!quote||quoteLoading||swapLoading||!config.evmAddress||!sparkAddressValid)?"default":"pointer",transition:"all 0.2s" }}>
             {!config.evmAddress ? "Configure EVM signer first" : !sparkAddressValid ? "Set valid Spark address" : swapLoading ? "Executing…" : quoteLoading ? "Fetching quote…" : "Swap"}
           </button>
         </div>
@@ -696,13 +696,13 @@ export default function SwapTab() {
 
       {/* Logs */}
       {logs.length > 0 && (
-        <div style={{ background:"#080808",border:"1px solid rgba(255,255,255,0.05)",borderRadius:14,padding:"14px 16px" }}>
+        <div style={{ background:"var(--surface)",border:"1px solid var(--border)",borderRadius:14,padding:"14px 16px" }}>
           <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:10 }}>
-            <div style={{ width:6,height:6,borderRadius:"50%",background:"#22c55e",animation:"pulse 1.5s infinite" }} />
-            <span style={{ fontSize:10,fontWeight:700,letterSpacing:"1.2px",textTransform:"uppercase",color:"#444" }}>Execution Log</span>
+            <div style={{ width:6,height:6,borderRadius:"50%",background:"var(--green)",animation:"pulse 1.5s infinite" }} />
+            <span style={{ fontSize:10,fontWeight:700,letterSpacing:"1.2px",textTransform:"uppercase",color:"var(--text-faint)" }}>Execution Log</span>
           </div>
           {logs.map((l,i)=>(
-            <div key={i} style={{ fontFamily:"JetBrains Mono,monospace",fontSize:11,display:"flex",gap:8,marginBottom:4,color:l.type==="err"?"#ef4444":l.type==="ok"?"#22c55e":"#555",alignItems:"flex-start" }}>
+            <div key={i} style={{ fontFamily:"JetBrains Mono,monospace",fontSize:11,display:"flex",gap:8,marginBottom:4,color:l.type==="err"?"var(--red)":l.type==="ok"?"var(--green)":"var(--text-muted)",alignItems:"flex-start" }}>
               <span style={{ opacity:0.4 }}>[{l.type==="ok"?"PASS":l.type==="err"?"FAIL":"WAIT"}]</span>
               <span style={{ wordBreak:"break-word",overflowWrap:"anywhere" }}>{l.text}</span>
             </div>
@@ -721,14 +721,14 @@ export default function SwapTab() {
             const ph = orderPhase(o);
             const explorerLink = `https://lo7f6nzsz0rpumbmurojel17.garden-staging.dealpulley.com/order/${o.orderId}`;
             return (
-              <a 
-                key={o.orderId} 
-                href={explorerLink} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                style={{ background:"#0f0f0f",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:"16px 18px", textDecoration: "none", display: "block", transition: "all 0.2s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(247,147,26,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "#0f0f0f"; }}
+              <a
+                key={o.orderId}
+                href={explorerLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ background:"var(--surface)",border:"1px solid var(--border)",borderRadius:16,padding:"16px 18px", textDecoration: "none", display: "block", transition: "all 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--orange-border)"; e.currentTarget.style.background = "var(--surface-2)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--surface)"; }}
               >
                 <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12 }}>
                   <span style={{ fontFamily:"JetBrains Mono,monospace",fontSize:11,color:"#444" }}>{o.orderId.slice(0,8)}…{o.orderId.slice(-6)}</span>

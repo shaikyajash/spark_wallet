@@ -316,115 +316,74 @@ export default function WalletTab() {
     return (
       <div style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
         <div style={{ width: "100%", maxWidth: 420 }}>
-          {/* Ambient glow behind card */}
           <div style={{ position: "relative" }}>
-            <div style={{ position: "absolute", inset: -40, background: "radial-gradient(circle, rgba(247,147,26,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
-
+            <div style={{ position: "absolute", inset: -60, background: "radial-gradient(circle, rgba(240,137,58,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
             <div style={{
               position: "relative",
-              background: "linear-gradient(145deg, #161616, #111)",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "linear-gradient(160deg, var(--surface-2), var(--surface))",
+              border: "1px solid var(--border-2)",
               borderRadius: 24,
               padding: "36px 32px",
-              boxShadow: "0 0 0 1px rgba(0,0,0,0.5), 0 24px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(139,163,209,0.08)",
             }}>
-              {/* Top accent */}
-              <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg, transparent, rgba(247,147,26,0.6), transparent)" }} />
+              <div style={{ position: "absolute", top: 0, left: "20%", right: "20%", height: 1, background: "linear-gradient(90deg, transparent, rgba(240,137,58,0.5), transparent)" }} />
 
-              {/* Logo + title */}
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
                 <div style={{
                   width: 48, height: 48, borderRadius: 14,
-                  background: "linear-gradient(135deg, #f7931a, #e55a00)",
+                  background: "linear-gradient(135deg, #f0893a, #c9680c)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 22, fontWeight: 900, color: "#000",
-                  boxShadow: "0 0 24px rgba(247,147,26,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  fontSize: 22, fontWeight: 900, color: "#fff",
+                  boxShadow: "0 0 24px rgba(240,137,58,0.3)",
                   flexShrink: 0,
                 }}>₿</div>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <h2 style={{ fontSize: 22, fontWeight: 800, color: "#f0f0f0", letterSpacing: "-0.5px", margin: 0 }}>Connect Wallet</h2>
-                    <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "1.2px", textTransform: "uppercase", color: "#f0b061", background: "rgba(247,147,26,0.1)", border: "1px solid rgba(247,147,26,0.2)", padding: "3px 7px", borderRadius: 999 }}>Secure</span>
+                    <h2 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.5px", margin: 0 }}>Connect Wallet</h2>
+                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--orange)", background: "var(--orange-dim)", border: "1px solid var(--orange-border)", padding: "3px 7px", borderRadius: 999 }}>Secure</span>
                   </div>
-                  <p style={{ fontSize: 12, color: "#555", marginTop: 2 }}>Spark network · end-to-end encrypted</p>
+                  <p style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 3 }}>Spark network · end-to-end encrypted</p>
                 </div>
               </div>
 
-              {/* Network selector */}
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#666", marginBottom: 8 }}>Network</label>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Network</label>
                 <div style={{ position: "relative" }}>
-                  <select
-                    value={network}
-                    onChange={(e) => setNetwork(e.target.value)}
-                    style={{
-                      width: "100%", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.12)",
-                      borderRadius: 12, color: "#e0e0e0", fontSize: 14, fontWeight: 600,
-                      padding: "12px 40px 12px 14px", outline: "none", cursor: "pointer",
-                      appearance: "none", fontFamily: "inherit",
-                      boxShadow: "inset 0 2px 4px rgba(0,0,0,0.3)",
-                    }}
-                    onFocus={e => (e.currentTarget.style.borderColor = "rgba(247,147,26,0.5)")}
-                    onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+                  <select value={network} onChange={(e) => setNetwork(e.target.value)}
+                    style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: 12, color: "var(--text)", fontSize: 14, fontWeight: 500, padding: "12px 40px 12px 14px", outline: "none", cursor: "pointer", appearance: "none", fontFamily: "inherit" }}
+                    onFocus={e => (e.currentTarget.style.borderColor = "var(--orange-border)")}
+                    onBlur={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
                   >
                     <option value="MAINNET">Mainnet — spark1...</option>
                     <option value="REGTEST">Regtest — sparkrt1...</option>
                   </select>
-                  <svg style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#555", pointerEvents: "none" }} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "var(--text-faint)", pointerEvents: "none" }} viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </div>
 
-              {/* Mnemonic input */}
               <div style={{ marginBottom: 24 }}>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "#666", marginBottom: 8 }}>Mnemonic Phrase</label>
-                <input
-                  type="password"
-                  placeholder="Enter your 12-word seed phrase"
-                  value={mnemonic}
-                  onChange={(e) => setMnemonic(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && connect()}
-                  style={{
-                    width: "100%", background: "#0d0d0d", border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 12, color: "#e8e8e8", fontSize: 14,
-                    padding: "13px 14px", outline: "none", fontFamily: "inherit",
-                    boxShadow: "inset 0 2px 4px rgba(0,0,0,0.3)",
-                    boxSizing: "border-box",
-                  }}
-                  onFocus={e => (e.currentTarget.style.borderColor = "rgba(247,147,26,0.5)")}
-                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+                <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Mnemonic Phrase</label>
+                <input type="password" placeholder="Enter your 12-word seed phrase" value={mnemonic}
+                  onChange={(e) => setMnemonic(e.target.value)} onKeyDown={(e) => e.key === "Enter" && connect()}
+                  style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: 12, color: "var(--text)", fontSize: 14, padding: "13px 14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+                  onFocus={e => (e.currentTarget.style.borderColor = "rgba(240,137,58,0.45)")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
                 />
-                <p style={{ fontSize: 11, color: "#444", marginTop: 6 }}>Your phrase never leaves this device.</p>
+                <p style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 6 }}>Your phrase never leaves this device.</p>
               </div>
 
-              {/* Connect button */}
-              <button
-                onClick={connect}
-                disabled={connectLoading}
-                style={{
-                  width: "100%", border: "none", borderRadius: 14, padding: "14px",
-                  fontSize: 15, fontWeight: 800, cursor: connectLoading ? "default" : "pointer",
-                  background: connectLoading ? "rgba(247,147,26,0.3)" : "linear-gradient(135deg, #f7931a, #e55a00)",
-                  color: connectLoading ? "rgba(0,0,0,0.5)" : "#000",
-                  boxShadow: connectLoading ? "none" : "0 4px 16px rgba(247,147,26,0.3)",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  transition: "all 0.2s",
-                }}
+              <button onClick={connect} disabled={connectLoading}
+                style={{ width: "100%", border: "none", borderRadius: 13, padding: "14px", fontSize: 15, fontWeight: 700, cursor: connectLoading ? "default" : "pointer", background: connectLoading ? "rgba(240,137,58,0.25)" : "linear-gradient(135deg, #f0893a, #c9680c)", color: connectLoading ? "var(--text-faint)" : "#fff", boxShadow: connectLoading ? "none" : "0 4px 18px rgba(240,137,58,0.28)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}
               >
-                {connectLoading ? (
-                  <>
-                    <svg style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
-                    Connecting…
-                  </>
-                ) : "Connect Wallet"}
+                {connectLoading ? (<><svg style={{ width: 16, height: 16, animation: "spin 1s linear infinite" }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>Connecting…</>) : "Connect Wallet"}
               </button>
 
               <Status msg={connectStatus.msg} type={(connectStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setConnectStatus({ msg: "", type: "" })} />
             </div>
           </div>
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -441,8 +400,8 @@ export default function WalletTab() {
   }
 
   const card: React.CSSProperties = {
-    background: "linear-gradient(145deg, #141414, #111)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: "linear-gradient(160deg, var(--surface-2), var(--surface))",
+    border: "1px solid var(--border)",
     borderRadius: 20,
     padding: "24px",
     display: "flex",
@@ -450,84 +409,52 @@ export default function WalletTab() {
     gap: 16,
     position: "relative",
     overflow: "hidden",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
   };
   const label: React.CSSProperties = {
     fontSize: 10, fontWeight: 700, letterSpacing: "1.2px",
-    textTransform: "uppercase", color: "#555",
+    textTransform: "uppercase", color: "var(--text-muted)",
   };
   const inp: React.CSSProperties = {
-    background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)",
-    borderRadius: 10, color: "#e0e0e0", fontSize: 13,
+    background: "var(--surface)", border: "1px solid var(--border-2)",
+    borderRadius: 10, color: "var(--text)", fontSize: 13,
     padding: "11px 14px", outline: "none", width: "100%", fontFamily: "inherit",
   };
   const sectionTitle = (text: string, badge?: string) => (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-      <span style={{ fontSize: 13, fontWeight: 700, color: "#ccc" }}>{text}</span>
-      {badge && <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1.2px", textTransform: "uppercase", color: "#f0b061", background: "rgba(247,147,26,0.1)", border: "1px solid rgba(247,147,26,0.2)", padding: "3px 8px", borderRadius: 999 }}>{badge}</span>}
+      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{text}</span>
+      {badge && <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--orange)", background: "var(--orange-dim)", border: "1px solid var(--orange-border)", padding: "3px 8px", borderRadius: 999 }}>{badge}</span>}
     </div>
   );
 
   return (
     <div style={{ padding: "28px 24px", maxWidth: 1100, margin: "0 auto" }}>
 
-      {/* Top bar: address + network + disconnect */}
+      {/* Top bar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px rgba(34,197,94,0.6)" }} />
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#555" }}>Connected</span>
-          <span style={{ fontSize: 11, color: "#333", fontFamily: "JetBrains Mono, monospace" }}>·</span>
-          <span style={{ fontSize: 11, color: "#666", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", padding: "3px 10px", borderRadius: 8, fontFamily: "JetBrains Mono, monospace" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)", boxShadow: "0 0 8px rgba(45,211,110,0.5)" }} />
+          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>Connected</span>
+          <span style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--surface-2)", border: "1px solid var(--border)", padding: "3px 10px", borderRadius: 8, fontFamily: "JetBrains Mono, monospace" }}>
             {network === "REGTEST" ? "Regtest" : "Mainnet"}
           </span>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button
-            onClick={togglePrivacy}
-            disabled={privacyLoading || privacyEnabled === null}
+          <button onClick={togglePrivacy} disabled={privacyLoading || privacyEnabled === null}
             title={privacyEnabled === false ? "Wallet is public — click to enable privacy" : "Wallet is private — click to make public"}
-            style={{
-              background: privacyEnabled === false ? "rgba(247,147,26,0.12)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${privacyEnabled === false ? "rgba(247,147,26,0.35)" : "rgba(255,255,255,0.08)"}`,
-              borderRadius: 8,
-              padding: "6px 12px",
-              fontSize: 11,
-              fontWeight: 700,
-              color: privacyEnabled === false ? "#f0b061" : "#888",
-              cursor: privacyLoading || privacyEnabled === null ? "default" : "pointer",
-              opacity: privacyLoading || privacyEnabled === null ? 0.6 : 1,
-              fontFamily: "inherit",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
+            style={{ background: privacyEnabled === false ? "var(--orange-dim)" : "var(--surface-2)", border: `1px solid ${privacyEnabled === false ? "var(--orange-border)" : "var(--border)"}`, borderRadius: 8, padding: "6px 12px", fontSize: 11, fontWeight: 600, color: privacyEnabled === false ? "var(--orange)" : "var(--text-muted)", cursor: privacyLoading || privacyEnabled === null ? "default" : "pointer", opacity: privacyLoading || privacyEnabled === null ? 0.6 : 1, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6 }}
           >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: privacyEnabled === false ? "#f7931a" : "#555" }} />
-            {privacyLoading
-              ? "…"
-              : privacyEnabled === null
-              ? "Privacy"
-              : privacyEnabled
-              ? "Private"
-              : "Public"}
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: privacyEnabled === false ? "var(--orange)" : "var(--text-faint)" }} />
+            {privacyLoading ? "…" : privacyEnabled === null ? "Privacy" : privacyEnabled ? "Private" : "Public"}
           </button>
-          <select
-            value={network}
-            onChange={(e) => switchNetwork(e.target.value)}
-            disabled={connectLoading}
-            style={{ background: "#111", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, color: "#888", fontSize: 11, fontWeight: 600, padding: "6px 10px", outline: "none", cursor: "pointer", fontFamily: "inherit" }}
+          <select value={network} onChange={(e) => switchNetwork(e.target.value)} disabled={connectLoading}
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text-muted)", fontSize: 11, fontWeight: 600, padding: "6px 10px", outline: "none", cursor: "pointer", fontFamily: "inherit" }}
           >
             <option value="MAINNET">Mainnet</option>
             <option value="REGTEST">Regtest</option>
           </select>
-          {privacyStatus.msg && (
-            <span style={{ fontSize: 10, color: privacyStatus.type === "err" ? "#ef4444" : privacyStatus.type === "ok" ? "#22c55e" : "#888" }}>
-              {privacyStatus.msg}
-            </span>
-          )}
-          <button
-            onClick={disconnect}
-            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 700, color: "#ef4444", cursor: "pointer" }}
-          >
+          {privacyStatus.msg && <span style={{ fontSize: 10, color: privacyStatus.type === "err" ? "var(--red)" : privacyStatus.type === "ok" ? "var(--green)" : "var(--text-muted)" }}>{privacyStatus.msg}</span>}
+          <button onClick={disconnect} style={{ background: "rgba(232,87,87,0.08)", border: "1px solid rgba(232,87,87,0.2)", borderRadius: 8, padding: "6px 14px", fontSize: 11, fontWeight: 600, color: "var(--red)", cursor: "pointer" }}>
             Disconnect
           </button>
         </div>
@@ -538,21 +465,18 @@ export default function WalletTab() {
 
         {/* Receive */}
         <div style={card}>
-          <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 1, background: "linear-gradient(90deg, transparent, rgba(247,147,26,0.3), transparent)" }} />
+          <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 1, background: "linear-gradient(90deg, transparent, rgba(240,137,58,0.35), transparent)" }} />
           {sectionTitle("Receive", "Address")}
           <div
             onClick={copyAddress}
             title="Click to copy"
-            style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "12px 14px", fontSize: 12, wordBreak: "break-all", color: "#aaa", cursor: "pointer", fontFamily: "JetBrains Mono, monospace", lineHeight: 1.6, minHeight: 60 }}
-            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(247,147,26,0.4)"; (e.currentTarget as HTMLDivElement).style.color = "#ddd"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLDivElement).style.color = "#aaa"; }}
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 14px", fontSize: 11, wordBreak: "break-all", color: "var(--text-muted)", cursor: "pointer", fontFamily: "JetBrains Mono, monospace", lineHeight: 1.6, minHeight: 60, transition: "all 0.15s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "var(--orange-border)"; (e.currentTarget as HTMLDivElement).style.color = "var(--text)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLDivElement).style.color = "var(--text-muted)"; }}
           >
             {address || "—"}
           </div>
-          <button
-            onClick={copyAddress}
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer", width: "100%", marginTop: "auto" }}
-          >
+          <button onClick={copyAddress} style={{ background: "var(--surface-3)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer", width: "100%", marginTop: "auto" }}>
             Copy Address
           </button>
           <Status msg={copyMsg} type="ok" onDismiss={() => setCopyMsg("")} />
@@ -560,19 +484,16 @@ export default function WalletTab() {
 
         {/* Balance */}
         <div style={card}>
-          <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 1, background: "linear-gradient(90deg, transparent, rgba(247,147,26,0.3), transparent)" }} />
+          <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 1, background: "linear-gradient(90deg, transparent, rgba(240,137,58,0.35), transparent)" }} />
           {sectionTitle("Balance", "Auto-refresh 5s")}
           <div style={{ minWidth: 0, overflow: "hidden" }}>
-            <div style={{ fontSize: 48, fontWeight: 900, background: "linear-gradient(135deg, #f7931a, #e06800)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-2px", lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontSize: 46, fontWeight: 900, background: "linear-gradient(135deg, #f0893a, #c9680c)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-2px", lineHeight: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {balanceSats !== null ? balanceSats.toLocaleString() : "—"}
             </div>
-            {balanceSats !== null && <div style={{ fontSize: 24, fontWeight: 700, color: "#f7931a", opacity: 0.7, marginTop: 2 }}>sats</div>}
-            {balanceSats !== null && <div style={{ fontSize: 13, color: "#555", marginTop: 6, wordBreak: "break-all" }}>{(Number(balanceSats) / 1e8).toFixed(8)} BTC</div>}
+            {balanceSats !== null && <div style={{ fontSize: 22, fontWeight: 600, color: "var(--orange)", opacity: 0.65, marginTop: 2 }}>sats</div>}
+            {balanceSats !== null && <div style={{ fontSize: 13, color: "var(--text-faint)", marginTop: 6 }}>{(Number(balanceSats) / 1e8).toFixed(8)} BTC</div>}
           </div>
-          <button
-            onClick={() => refreshBalance()}
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer", width: "100%", marginTop: "auto" }}
-          >
+          <button onClick={() => refreshBalance()} style={{ background: "var(--surface-3)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer", width: "100%", marginTop: "auto" }}>
             Refresh Balance
           </button>
           <Status msg={balanceStatus.msg} type={(balanceStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setBalanceStatus({ msg: "", type: "" })} />
@@ -594,16 +515,15 @@ export default function WalletTab() {
               style={inp}
             />
           </div>
-          <button
-            onClick={checkAddressBalance} disabled={checkLoading}
-            style={{ background: checkLoading ? "rgba(247,147,26,0.2)" : "linear-gradient(135deg,#f7931a,#e55a00)", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 800, color: checkLoading ? "#888" : "#000", cursor: "pointer", width: "100%" }}
+          <button onClick={checkAddressBalance} disabled={checkLoading}
+            style={{ background: checkLoading ? "rgba(240,137,58,0.2)" : "linear-gradient(135deg, #f0893a, #c9680c)", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 700, color: checkLoading ? "var(--text-faint)" : "#fff", cursor: "pointer", width: "100%", boxShadow: checkLoading ? "none" : "0 3px 12px rgba(240,137,58,0.2)" }}
           >
             {checkLoading ? "Checking…" : "Check Balance"}
           </button>
           {checkResult && (
-            <div style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px", minWidth: 0, overflow: "hidden" }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: "#f7931a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{checkResult.sats.toLocaleString()} <span style={{ fontSize: 14, opacity: 0.7 }}>sats</span></div>
-              <div style={{ fontSize: 12, color: "#555", marginTop: 4, wordBreak: "break-all" }}>{checkResult.btc} BTC · {checkResult.network}</div>
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "14px", minWidth: 0, overflow: "hidden" }}>
+              <div style={{ fontSize: 24, fontWeight: 800, color: "var(--orange)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{checkResult.sats.toLocaleString()} <span style={{ fontSize: 14, opacity: 0.6 }}>sats</span></div>
+              <div style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 4 }}>{checkResult.btc} BTC · {checkResult.network}</div>
             </div>
           )}
           <Status msg={checkStatus.msg} type={(checkStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setCheckStatus({ msg: "", type: "" })} />
@@ -622,9 +542,8 @@ export default function WalletTab() {
             <input type="number" placeholder="e.g. 1000" min={1} value={sendSats}
               onChange={(e) => setSendSats(e.target.value)} style={inp} />
           </div>
-          <button
-            onClick={send} disabled={sendLoading}
-            style={{ background: sendLoading ? "rgba(34,197,94,0.2)" : "#22c55e", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 800, color: sendLoading ? "#888" : "#000", cursor: "pointer", width: "100%", marginTop: "auto" }}
+          <button onClick={send} disabled={sendLoading}
+            style={{ background: sendLoading ? "rgba(45,211,110,0.15)" : "linear-gradient(135deg, #2dd36e, #1aaa52)", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 700, color: sendLoading ? "var(--text-faint)" : "#fff", cursor: "pointer", width: "100%", marginTop: "auto", boxShadow: sendLoading ? "none" : "0 3px 12px rgba(45,211,110,0.2)" }}
           >
             {sendLoading ? "Sending…" : "Send"}
           </button>
@@ -647,42 +566,36 @@ export default function WalletTab() {
         {transfers.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px 20px", color: "#444", fontSize: 13 }}>No transactions found.</div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {transfers.map((tx) => {
               const isIn = tx.direction === "INCOMING";
               const date = tx.createdAt ? new Date(tx.createdAt).toLocaleString() : "—";
               const shortId = tx.id ? `${tx.id.slice(0, 18)}…` : "—";
-              const explorerUrl = network === "MAINNET" 
-                ? `https://sparkscan.io/tx/${tx.id}` 
+              const explorerUrl = network === "MAINNET"
+                ? `https://sparkscan.io/tx/${tx.id}`
                 : `https://sparkscan.io/tx/${tx.id}?network=regtest`;
               return (
-                <a 
-                  key={tx.id} 
-                  href={explorerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, textDecoration: "none", transition: "all 0.2s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(247,147,26,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; (e.currentTarget.querySelector(".link-hint") as HTMLElement).style.opacity = "1"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"; e.currentTarget.style.background = "#0a0a0a"; (e.currentTarget.querySelector(".link-hint") as HTMLElement).style.opacity = "0.3"; }}
+                <a key={tx.id} href={explorerUrl} target="_blank" rel="noopener noreferrer"
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, textDecoration: "none", transition: "all 0.15s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--orange-border)"; e.currentTarget.style.background = "var(--surface-2)"; (e.currentTarget.querySelector(".link-hint") as HTMLElement).style.opacity = "1"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--surface)"; (e.currentTarget.querySelector(".link-hint") as HTMLElement).style.opacity = "0.3"; }}
                 >
                   <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase", padding: "2px 8px", borderRadius: 6, background: isIn ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)", color: isIn ? "#22c55e" : "#ef4444" }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", padding: "2px 8px", borderRadius: 6, background: isIn ? "var(--green-dim)" : "rgba(232,87,87,0.1)", color: isIn ? "var(--green)" : "var(--red)" }}>
                         {isIn ? "Received" : "Sent"}
                       </span>
-                      <span style={{ fontSize: 11, color: "#555" }}>{date}</span>
+                      <span style={{ fontSize: 11, color: "var(--text-faint)" }}>{date}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
-                      <span style={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace", color: "#444", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {shortId}
-                      </span>
-                      <svg className="link-hint" style={{ width: 10, height: 10, color: "#666", opacity: 0.3, transition: "all 0.2s", flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <span style={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace", color: "var(--text-faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortId}</span>
+                      <svg className="link-hint" style={{ width: 10, height: 10, color: "var(--text-muted)", opacity: 0.3, transition: "all 0.15s", flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                     </div>
                   </div>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: isIn ? "#22c55e" : "#e0e0e0", whiteSpace: "nowrap" }}>
-                    {isIn ? "+" : "−"}{Number(tx.sats).toLocaleString()} <span style={{ fontSize: 11, opacity: 0.6 }}>sats</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: isIn ? "var(--green)" : "var(--text)", whiteSpace: "nowrap" }}>
+                    {isIn ? "+" : "−"}{Number(tx.sats).toLocaleString()} <span style={{ fontSize: 11, opacity: 0.5 }}>sats</span>
                   </span>
                 </a>
               );
@@ -691,16 +604,12 @@ export default function WalletTab() {
         )}
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-          <button
-            disabled={txPage === 0}
-            onClick={() => loadTx({ page: txPage - 1, offsets: txOffsets })}
-            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "6px 18px", fontSize: 12, fontWeight: 600, color: txPage === 0 ? "#333" : "#666", cursor: txPage === 0 ? "default" : "pointer" }}
+          <button disabled={txPage === 0} onClick={() => loadTx({ page: txPage - 1, offsets: txOffsets })}
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 18px", fontSize: 12, fontWeight: 600, color: txPage === 0 ? "var(--text-faint)" : "var(--text-muted)", cursor: txPage === 0 ? "default" : "pointer" }}
           >← Prev</button>
-          <span style={{ fontSize: 11, color: "#444" }}>Page {txPage + 1}</span>
-          <button
-            disabled={!txHasNext}
-            onClick={() => loadTx({ page: txPage + 1, offsets: txOffsets })}
-            style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "6px 18px", fontSize: 12, fontWeight: 600, color: !txHasNext ? "#333" : "#666", cursor: !txHasNext ? "default" : "pointer" }}
+          <span style={{ fontSize: 11, color: "var(--text-faint)" }}>Page {txPage + 1}</span>
+          <button disabled={!txHasNext} onClick={() => loadTx({ page: txPage + 1, offsets: txOffsets })}
+            style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 18px", fontSize: 12, fontWeight: 600, color: !txHasNext ? "var(--text-faint)" : "var(--text-muted)", cursor: !txHasNext ? "default" : "pointer" }}
           >Next →</button>
         </div>
         <Status msg={txStatus.msg} type={(txStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setTxStatus({ msg: "", type: "" })} />
