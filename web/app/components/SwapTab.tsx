@@ -439,6 +439,46 @@ export default function SwapTab() {
         </button>
       </div>
 
+      {/* MetaMask prompt — visible inline when not connected */}
+      {!config.evmAddress && !showConfig && (
+        <div style={{ background: "linear-gradient(135deg, rgba(247,147,26,0.08), rgba(247,147,26,0.04))", border: "1px solid rgba(247,147,26,0.25)", borderRadius: 18, padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(247,147,26,0.12)", border: "1px solid rgba(247,147,26,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🦊</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#f0f0f0", marginBottom: 3 }}>Connect MetaMask</div>
+              <div style={{ fontSize: 11, color: "#666" }}>Required to sign EVM transactions</div>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              setConnectingMM(true);
+              setMMError("");
+              try {
+                if (!(window as any).ethereum) throw new Error("MetaMask not found. Please install MetaMask");
+                const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
+                const cfg = { ...config, evmAddress: accounts[0] };
+                setConfig(cfg);
+                saveConfig(cfg);
+                loadAssets(cfg);
+              } catch (e: unknown) {
+                setMMError(e instanceof Error ? e.message : String(e));
+              } finally {
+                setConnectingMM(false);
+              }
+            }}
+            disabled={connectingMM}
+            style={{ background: connectingMM ? "rgba(247,147,26,0.3)" : "linear-gradient(135deg, #f7931a, #e55a00)", border: "none", borderRadius: 12, padding: "10px 20px", fontSize: 13, fontWeight: 800, color: connectingMM ? "#888" : "#000", cursor: connectingMM ? "default" : "pointer", whiteSpace: "nowrap", boxShadow: connectingMM ? "none" : "0 4px 12px rgba(247,147,26,0.25)", flexShrink: 0 }}
+          >
+            {connectingMM ? "Connecting…" : "Connect"}
+          </button>
+        </div>
+      )}
+      {mmError && !showConfig && (
+        <div style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "12px 14px", fontSize: 12, color: "#ef4444" }}>
+          {mmError}
+        </div>
+      )}
+
       {/* Config Panel */}
       {showConfig && (
         <div style={{ background: "linear-gradient(160deg, #131313, #0c0c0c)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.4)" }}>
