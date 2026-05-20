@@ -34,7 +34,7 @@ function load(): SwapConfig {
 function loadOrders(): OrderRecord[] { try { return JSON.parse(localStorage.getItem(ORDERS_KEY)??"[]"); } catch { return []; } }
 function saveOrders(o: OrderRecord[]) { localStorage.setItem(ORDERS_KEY,JSON.stringify(o)); }
 
-// Only secrets are imported from .env now. Staging URLs/appId are hardcoded above.
+// Only EVM secrets are imported from .env. Spark address loads from env in WalletTab.
 function parseEnv(txt: string): Partial<SwapConfig> {
   const r: Partial<SwapConfig> = {};
   for (const line of txt.split("\n")) {
@@ -45,7 +45,6 @@ function parseEnv(txt: string): Partial<SwapConfig> {
       case "EVM_RPC_URL": r.evmRpcUrl=v; break;
       case "EVM_OWNER": r.evmAddress=v; break;
       case "EVM_PRIVATE_KEY": r.evmPrivateKey=v; break;
-      case "SPARK_OWNER": r.sparkAddress=v; break;
     }
   }
   return r;
@@ -420,7 +419,6 @@ export default function SwapTab() {
           { ph: "EVM Address", env: "EVM_OWNER", val: config.evmAddress, key: "evmAddress" as const, required: true },
           { ph: "EVM Private Key", env: "EVM_PRIVATE_KEY", val: config.evmPrivateKey, key: "evmPrivateKey" as const, pwd: true, required: true },
           { ph: "EVM RPC URL", env: "EVM_RPC_URL", val: config.evmRpcUrl, key: "evmRpcUrl" as const, required: true },
-          { ph: "Spark Address", env: "SPARK_OWNER", val: config.sparkAddress, key: "sparkAddress" as const, required: false },
         ];
         return (
           <div style={{ background: "linear-gradient(160deg, #131313, #0c0c0c)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.4)" }}>
@@ -446,7 +444,7 @@ export default function SwapTab() {
                 </div>
                 <div style={{ position: "relative" }}>
                   <textarea
-                    placeholder={"EVM_PRIVATE_KEY=0x…\nEVM_OWNER=0x…\nEVM_RPC_URL=https://…\nSPARK_OWNER=spark1…  # optional"}
+                    placeholder={"EVM_PRIVATE_KEY=0x…\nEVM_OWNER=0x…\nEVM_RPC_URL=https://…"}
                     rows={5}
                     value={envText}
                     onChange={e => setEnvText(e.target.value)}
