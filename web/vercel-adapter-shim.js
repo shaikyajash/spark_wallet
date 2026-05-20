@@ -29,25 +29,42 @@ function writeDeterministic(distDir) {
   }
 }
 
-function backupDir(src, dst) {
+function copyDir(src, dst) {
+  if (!fs.existsSync(src)) return false;
   try {
+    fs.mkdirSync(dst, { recursive: true });
     fs.cpSync(src, dst, { recursive: true, force: true, dereference: false });
-    console.log('[vercel-shim] backed up', src, '→', dst);
     return true;
   } catch (e) {
-    console.warn('[vercel-shim] backup error:', e.message);
+    console.warn('[vercel-shim] copy error', src, '->', dst, ':', e.message);
     return false;
   }
 }
 
 function restoreDir(src, dst) {
+  if (!fs.existsSync(src)) return;
   try {
     fs.mkdirSync(dst, { recursive: true });
     fs.cpSync(src, dst, { recursive: true, force: false, dereference: false });
-    console.log('[vercel-shim] restored', src, '→', dst);
+    console.log('[vercel-shim] restored →', dst);
   } catch (e) {
     console.warn('[vercel-shim] restore error:', e.message);
   }
+}
+
+function findNextAdapterDir(projectDir) {
+  const candidates = [
+    path.join(projectDir, 'node_modules/next/dist/build/adapter'),
+    path.join(process.cwd(), 'node_modules/next/dist/build/adapter'),
+  ];
+  if (process.env.VERCEL || process.env.NOW_BUILDER) {
+    candidates.push('/vercel/path0/node_modules/next/dist/build/adapter');
+    candidates.push('/vercel/path0/web/node_modules/next/dist/build/adapter');
+  }
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return null;
 }
 
 /** @type {import('next').NextAdapter} */
@@ -62,15 +79,20 @@ const adapter = {
   },
 
   async onBuildComplete(ctx) {
-    const { distDir } = ctx;
-    console.log('[vercel-shim] onBuildComplete distDir:', distDir, 'cwd:', process.cwd());
+    const { distDir, projectDir } = ctx;
+    console.log('[vercel-shim] onBuildComplete distDir:', distDir, 'projectDir:', projectDir, 'cwd:', process.cwd());
 
-    // Make sure the deterministic manifest exists before backup.
     writeDeterministic(distDir);
 
-    // Back up the entire .next directory to a tmp location before Vercel's adapter runs.
+    // Back up .next AND the next adapter directory.
     const backupRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'next-backup-'));
-    const backedUp = backupDir(distDir, backupRoot);
+    const distBackup = path.join(backupRoot, 'dist');
+    const adapterBackup = path.join(backupRoot, 'adapter');
+
+    const distOK = copyDir(distDir, distBackup);
+    const adapterSrc = findNextAdapterDir(projectDir || process.cwd());
+    const adapterOK = adapterSrc ? copyDir(adapterSrc, adapterBackup) : false;
+    console.log('[vercel-shim] backed up dist:', distOK, 'adapter:', adapterOK, 'from', adapterSrc);
 
     try {
       const vercel = await getVercelAdapter();
@@ -81,18 +103,29 @@ const adapter = {
       console.warn('[vercel-shim] vercel adapter error:', e.message);
     }
 
-    // Restore anything Vercel's adapter removed.
-    if (backedUp) {
-      restoreDir(backupRoot, distDir);
-      // Also restore to any other path Vercel CLI might read from.
+    // Restore .next
+    if (distOK) {
+      restoreDir(distBackup, distDir);
       if (process.env.VERCEL || process.env.NOW_BUILDER) {
         for (const alt of ['/vercel/path0/.next', '/vercel/path0/web/.next']) {
-          if (alt !== distDir) restoreDir(backupRoot, alt);
+          if (alt !== distDir) restoreDir(distBackup, alt);
         }
       }
     }
 
-    // Cleanup backup
+    // Restore the next adapter directory (setup-node-env.external.js etc.)
+    if (adapterOK && adapterSrc) {
+      restoreDir(adapterBackup, adapterSrc);
+      if (process.env.VERCEL || process.env.NOW_BUILDER) {
+        for (const alt of [
+          '/vercel/path0/node_modules/next/dist/build/adapter',
+          '/vercel/path0/web/node_modules/next/dist/build/adapter',
+        ]) {
+          if (alt !== adapterSrc) restoreDir(adapterBackup, alt);
+        }
+      }
+    }
+
     try { fs.rmSync(backupRoot, { recursive: true, force: true }); } catch {}
   },
 };
