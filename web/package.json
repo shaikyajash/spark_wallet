@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 8000",
-    "build": "next build",
+    "build": "next build && node -e \"const fs=require('fs'),path=require('path'),d=path.join(process.cwd(),'.next'),out=path.join(d,'routes-manifest-deterministic.json');if(!fs.existsSync(out)){const src=path.join(d,'routes-manifest.json');if(fs.existsSync(src)){const m=JSON.parse(fs.readFileSync(src,'utf8'));const s=o=>Array.isArray(o)?o.map(s):o&&typeof o==='object'?Object.fromEntries(Object.keys(o).sort().map(k=>[k,s(o[k])])):o;fs.writeFileSync(out,JSON.stringify(s(m)));console.log('postbuild: wrote',out);}else{console.log('postbuild: routes-manifest.json missing, skipping');}}else{console.log('postbuild: already exists',out);}\"",
     "start": "next start -p 8000",
     "lint": "eslint"
   },
