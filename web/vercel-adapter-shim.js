@@ -26,34 +26,46 @@ const adapter = {
   async onBuildComplete(ctx) {
     const { distDir } = ctx;
 
-    // Read routes-manifest.json BEFORE Vercel's adapter runs — it may move/delete distDir.
-    let deterministicContent;
+    const sort = (o) =>
+      Array.isArray(o) ? o.map(sort) :
+      o && typeof o === 'object'
+        ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sort(o[k])]))
+        : o;
+
+    // Read content before Vercel's adapter can move/delete distDir.
+    let content;
     try {
       const manifest = JSON.parse(fs.readFileSync(path.join(distDir, 'routes-manifest.json'), 'utf8'));
-      const sort = (o) =>
-        Array.isArray(o) ? o.map(sort) :
-        o && typeof o === 'object'
-          ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sort(o[k])]))
-          : o;
-      deterministicContent = JSON.stringify(sort(manifest));
+      content = JSON.stringify(sort(manifest));
     } catch (e) {
-      console.warn('[vercel-shim] could not read routes-manifest.json:', e.message);
+      console.warn('[vercel-shim] read error:', e.message);
     }
 
-    const vercel = await getVercelAdapter();
-    if (vercel?.onBuildComplete) {
-      await vercel.onBuildComplete(ctx);
-    }
-
-    // Write AFTER Vercel's adapter so it survives any cleanup Vercel's adapter does.
-    if (deterministicContent) {
+    const write = () => {
+      if (!content) return;
       try {
         fs.mkdirSync(distDir, { recursive: true });
-        fs.writeFileSync(path.join(distDir, 'routes-manifest-deterministic.json'), deterministicContent);
+        fs.writeFileSync(path.join(distDir, 'routes-manifest-deterministic.json'), content);
+        console.log('[vercel-shim] wrote routes-manifest-deterministic.json to', distDir);
       } catch (e) {
-        console.warn('[vercel-shim] could not write routes-manifest-deterministic.json:', e.message);
+        console.warn('[vercel-shim] write error:', e.message);
       }
+    };
+
+    // Write BEFORE so Vercel's adapter finds the file if it reads it.
+    write();
+
+    try {
+      const vercel = await getVercelAdapter();
+      if (vercel?.onBuildComplete) {
+        await vercel.onBuildComplete(ctx);
+      }
+    } catch (e) {
+      console.warn('[vercel-shim] vercel adapter error:', e.message);
     }
+
+    // Write AGAIN after in case Vercel's adapter deleted distDir.
+    write();
   },
 };
 
