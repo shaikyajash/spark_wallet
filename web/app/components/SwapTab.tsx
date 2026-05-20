@@ -205,11 +205,28 @@ export default function SwapTab() {
   }, []);
 
   useEffect(() => {
-    const s = load(); setConfig(s); cfgRef.current = s;
-    // Show settings until the user has supplied an EVM key (URLs are hardcoded for staging).
-    setShowConfig(!s.evmAddress);
-    loadAssets(s);
-    setOrders(loadOrders());
+    (async () => {
+      const s = load();
+      // Auto-load EVM_RPC_URL and Spark address from server env
+      try {
+        const envConfig = await fetch("/api/config").then(r => r.json());
+        if (envConfig?.evmRpcUrl && !s.evmRpcUrl) {
+          s.evmRpcUrl = envConfig.evmRpcUrl;
+        }
+        if (envConfig?.sparkOwner && !s.sparkAddress) {
+          s.sparkAddress = envConfig.sparkOwner;
+        }
+        localStorage.setItem(KEY, JSON.stringify(s));
+      } catch (e) {
+        console.error("Failed to load config from env:", e);
+      }
+      setConfig(s);
+      cfgRef.current = s;
+      // Show settings until the user has supplied an EVM key
+      setShowConfig(!s.evmAddress);
+      loadAssets(s);
+      setOrders(loadOrders());
+    })();
   }, [loadAssets]);
 
   const refreshOrder = useCallback(async (orderId: string) => {
@@ -418,7 +435,6 @@ export default function SwapTab() {
         const fields = [
           { ph: "EVM Address", env: "EVM_OWNER", val: config.evmAddress, key: "evmAddress" as const, required: true },
           { ph: "EVM Private Key", env: "EVM_PRIVATE_KEY", val: config.evmPrivateKey, key: "evmPrivateKey" as const, pwd: true, required: true },
-          { ph: "EVM RPC URL", env: "EVM_RPC_URL", val: config.evmRpcUrl, key: "evmRpcUrl" as const, required: true },
         ];
         return (
           <div style={{ background: "linear-gradient(160deg, #131313, #0c0c0c)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden", boxShadow: "0 12px 32px rgba(0,0,0,0.4)" }}>
@@ -444,7 +460,7 @@ export default function SwapTab() {
                 </div>
                 <div style={{ position: "relative" }}>
                   <textarea
-                    placeholder={"EVM_PRIVATE_KEY=0x…\nEVM_OWNER=0x…\nEVM_RPC_URL=https://…"}
+                    placeholder={"EVM_PRIVATE_KEY=0x…\nEVM_OWNER=0x…"}
                     rows={5}
                     value={envText}
                     onChange={e => setEnvText(e.target.value)}
@@ -533,16 +549,16 @@ export default function SwapTab() {
               {/* Save */}
               <button
                 onClick={() => { saveConfig(config); loadAssets(config); setShowConfig(false); }}
-                disabled={!config.evmAddress || !config.evmPrivateKey || !config.evmRpcUrl}
+                disabled={!config.evmAddress || !config.evmPrivateKey}
                 style={{
-                  background: (!config.evmAddress || !config.evmPrivateKey || !config.evmRpcUrl) ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #f7931a, #e55a00)",
+                  background: (!config.evmAddress || !config.evmPrivateKey) ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #f7931a, #e55a00)",
                   border: "none",
                   borderRadius: 12,
                   padding: "13px",
                   fontSize: 13,
                   fontWeight: 800,
-                  color: (!config.evmAddress || !config.evmPrivateKey || !config.evmRpcUrl) ? "#555" : "#000",
-                  cursor: (!config.evmAddress || !config.evmPrivateKey || !config.evmRpcUrl) ? "default" : "pointer",
+                  color: (!config.evmAddress || !config.evmPrivateKey) ? "#555" : "#000",
+                  cursor: (!config.evmAddress || !config.evmPrivateKey) ? "default" : "pointer",
                   letterSpacing: "0.3px",
                   boxShadow: (!config.evmAddress || !config.evmPrivateKey || !config.evmRpcUrl) ? "none" : "0 4px 16px rgba(247,147,26,0.25)",
                 }}
