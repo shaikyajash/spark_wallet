@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #080808;
+  --surface: #0f0f0f;
+  --surface-2: #141414;
+  --surface-3: #1a1a1a;
+  --border: rgba(255,255,255,0.06);
+  --border-2: rgba(255,255,255,0.1);
+  --text: #f0f0f0;
+  --text-muted: #888;
+  --text-faint: #444;
+  --orange: #f7931a;
+  --orange-dim: rgba(247,147,26,0.1);
+  --orange-border: rgba(247,147,26,0.2);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.1);
+  --green-border: rgba(34,197,94,0.2);
+  --blue: #3b82f6;
+  --red: #ef4444;
+  --purple: #a855f7;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: radial-gradient(circle at 50% 0%, rgba(247, 147, 26, 0.03) 0%, var(--background) 50%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Override global input styles for swap — individual components use their own */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes pulse-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.animate-fade-in { animation: fadeIn 0.3s ease; }
+.animate-slide-in { animation: slideIn 0.2s ease; }
+
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* Chain icon gradient colors */
+.chain-btc { background: linear-gradient(135deg, #f7931a, #e67e00); }
+.chain-eth { background: linear-gradient(135deg, #627EEA, #3b5bd5); }
+.chain-arb { background: linear-gradient(135deg, #28a0f0, #1a7abf); }
+.chain-spark { background: linear-gradient(135deg, #f7931a, #ff6b35); }
+.chain-default { background: linear-gradient(135deg, #3a3a3a, #222); }

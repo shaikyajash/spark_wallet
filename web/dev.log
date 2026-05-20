@@ -1,0 +1,17 @@
+
+> web@0.1.0 dev
+> next dev -p 8000
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:8000
+- Network:       http://192.168.137.160:8000
+✓ Ready in 260ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3001
+- PID:          41114
+- Dir:          /Users/shaikyajash/garden-staging-swap-script/web
+- Log:          .next/dev/logs/next-development.log
+
+Run kill 41114 to stop it.
+[?25h
