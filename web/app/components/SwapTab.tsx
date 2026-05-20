@@ -153,9 +153,9 @@ export default function SwapTab() {
   const prevFromAssetRef = useRef<string | null>(null);
 
   const STATIC_ASSETS: Asset[] = [
-    { id: "spark_regtest:btc",     chain: "spark_regtest",    minAmount: "5",  decimals: 8 },
-    { id: "arbitrum_sepolia:wbtc", chain: "arbitrum_sepolia", minAmount: "5",  decimals: 8 },
-    { id: "arbitrum_sepolia:eth",  chain: "arbitrum_sepolia", minAmount: "100", decimals: 18 },
+    { id: "spark_regtest:btc",     chain: "spark_regtest",    minAmount: "5",              decimals: 8  },
+    { id: "arbitrum_sepolia:wbtc", chain: "arbitrum_sepolia", minAmount: "10",             decimals: 8  },
+    { id: "arbitrum_sepolia:eth",  chain: "arbitrum_sepolia", minAmount: "500000000000000", decimals: 18 },
   ];
 
   const loadAssets = useCallback((_cfg: SwapConfig) => {
