@@ -34,6 +34,19 @@ function writeFile(dir, content) {
   }
 }
 
+function writeEverywhere(distDir, content) {
+  const targets = new Set();
+  targets.add(distDir);
+  targets.add(path.join(process.cwd(), '.next'));
+  // Vercel hardcoded fallback — covers any rootDirectory mismatch.
+  if (process.env.VERCEL || process.env.NOW_BUILDER) {
+    targets.add('/vercel/path0/.next');
+    targets.add('/vercel/path0/web/.next');
+    targets.add('/vercel/output/.next');
+  }
+  for (const t of targets) writeFile(t, content);
+}
+
 /** @type {import('next').NextAdapter} */
 const adapter = {
   name: 'vercel-shim',
@@ -47,18 +60,12 @@ const adapter = {
 
   async onBuildComplete(ctx) {
     const { distDir } = ctx;
-    console.log('[vercel-shim] onBuildComplete distDir:', distDir, 'cwd:', process.cwd());
+    console.log('[vercel-shim] onBuildComplete distDir:', distDir, 'cwd:', process.cwd(), 'VERCEL:', !!process.env.VERCEL);
 
-    // Read manifest content before Vercel's adapter can move/delete distDir.
     const content = buildContent(distDir);
     console.log('[vercel-shim] content ready:', !!content);
 
-    // Write before Vercel's adapter (in case it reads the file).
-    writeFile(distDir, content);
-
-    // Always also write to cwd-relative .next (covers rootDirectory mismatches).
-    const cwdNext = path.join(process.cwd(), '.next');
-    if (cwdNext !== distDir) writeFile(cwdNext, content);
+    writeEverywhere(distDir, content);
 
     try {
       const vercel = await getVercelAdapter();
@@ -69,13 +76,7 @@ const adapter = {
       console.warn('[vercel-shim] vercel adapter error:', e.message);
     }
 
-    // Write again after in case Vercel's adapter deleted distDir.
-    writeFile(distDir, content);
-    if (cwdNext !== distDir) writeFile(cwdNext, content);
-
-    // Confirm final state.
-    const target = path.join(distDir, 'routes-manifest-deterministic.json');
-    console.log('[vercel-shim] file exists at distDir after all writes:', fs.existsSync(target));
+    writeEverywhere(distDir, content);
   },
 };
 
