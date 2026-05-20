@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 8000",
-    "build": "next build",
+    "build": "next build && node -e \"const fs=require('fs'),m=JSON.parse(fs.readFileSync('.next/routes-manifest.json','utf8'));const sorted=o=>Array.isArray(o)?o.map(sorted):o&&typeof o==='object'?Object.fromEntries(Object.keys(o).sort().map(k=>[k,sorted(o[k])])):o;fs.writeFileSync('.next/routes-manifest-deterministic.json',JSON.stringify(sorted(m)))\"",
     "start": "next start -p 8000",
     "lint": "eslint"
   },
