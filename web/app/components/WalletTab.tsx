@@ -97,39 +97,59 @@ export default function WalletTab() {
   }, [txOffsets]);
 
   const startAutoRefresh = useCallback((addr: string) => {
-    setAddress(addr);
-    setConnected(true);
-    if (timerRef.current) clearInterval(timerRef.current);
-    refreshBalance(false);
-    loadTx({ page: 0, offsets: [0], silent: false });
-    timerRef.current = setInterval(async () => {
-      if (refreshInFlight.current) return;
-      refreshInFlight.current = true;
-      try {
-        const status = await api("/api/status", {}, 0);
-        if (!status.connected) {
-          setConnected(false);
-          setAddress("");
-          if (timerRef.current) clearInterval(timerRef.current);
-          return;
+    try {
+      setAddress(addr);
+      setConnected(true);
+      if (timerRef.current) clearInterval(timerRef.current);
+
+      Promise.resolve()
+        .then(() => refreshBalance(false))
+        .catch(e => console.error("Initial balance refresh failed:", e));
+
+      Promise.resolve()
+        .then(() => loadTx({ page: 0, offsets: [0], silent: false }))
+        .catch(e => console.error("Initial tx load failed:", e));
+
+      timerRef.current = setInterval(async () => {
+        if (refreshInFlight.current) return;
+        refreshInFlight.current = true;
+        try {
+          const status = await api("/api/status", {}, 0);
+          if (!status?.connected) {
+            setConnected(false);
+            setAddress("");
+            if (timerRef.current) clearInterval(timerRef.current);
+            return;
+          }
+          await Promise.all([
+            refreshBalance(true).catch(e => console.error("Refresh failed:", e)),
+            loadTx({ page: txPage, offsets: txOffsets, silent: true }).catch(e => console.error("Load tx failed:", e))
+          ]);
+        } catch (e) {
+          console.error("Auto-refresh error:", e);
+        } finally {
+          refreshInFlight.current = false;
         }
-        await Promise.all([refreshBalance(true), loadTx({ page: txPage, offsets: txOffsets, silent: true })]);
-      } catch {
-        // Silent failure on refresh
-      } finally {
-        refreshInFlight.current = false;
-      }
-    }, 5000);
-  }, [refreshBalance, loadTx, txPage, txOffsets]);
+      }, 5000);
+    } catch (e) {
+      console.error("startAutoRefresh error:", e);
+      setConnectStatus({ msg: `Failed to start refresh: ${e instanceof Error ? e.message : String(e)}`, type: "err" });
+    }
+  }, [refreshBalance, loadTx, txPage, txOffsets, setConnectStatus]);
 
   // Check existing session on mount
   useEffect(() => {
-    api("/api/status").then((data) => {
-      if (data.connected && data.address) {
-        if (data.network) setNetwork(data.network);
-        startAutoRefresh(data.address);
+    (async () => {
+      try {
+        const data = await api("/api/status", {}, 0);
+        if (data?.connected && data?.address) {
+          if (data.network) setNetwork(data.network);
+          startAutoRefresh(data.address);
+        }
+      } catch (e) {
+        console.error("Status check failed:", e);
       }
-    }).catch(() => {});
+    })();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -143,11 +163,14 @@ export default function WalletTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mnemonic: mnemonic.trim(), network }),
       });
+      if (!data?.address) {
+        throw new Error("No address received from server");
+      }
       startAutoRefresh(data.address);
     } catch (e: unknown) {
-      setConnectStatus({ msg: `Error: ${e instanceof Error ? e.message : String(e)}`, type: "err" });
-    } finally {
+      console.error("Connect failed:", e);
       setConnectLoading(false);
+      setConnectStatus({ msg: `Error: ${e instanceof Error ? e.message : String(e)}`, type: "err" });
     }
   }
 
