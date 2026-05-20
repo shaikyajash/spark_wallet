@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 async function getVercelAdapter() {
   const p = process.env.NEXT_ADAPTER_PATH;
@@ -8,43 +9,45 @@ async function getVercelAdapter() {
   return mod.default ?? mod;
 }
 
-function buildContent(distDir) {
+const sort = (o) =>
+  Array.isArray(o) ? o.map(sort) :
+  o && typeof o === 'object'
+    ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sort(o[k])]))
+    : o;
+
+function writeDeterministic(distDir) {
   try {
-    const m = JSON.parse(fs.readFileSync(path.join(distDir, 'routes-manifest.json'), 'utf8'));
-    const sort = (o) =>
-      Array.isArray(o) ? o.map(sort) :
-      o && typeof o === 'object'
-        ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sort(o[k])]))
-        : o;
-    return JSON.stringify(sort(m));
+    const src = path.join(distDir, 'routes-manifest.json');
+    if (!fs.existsSync(src)) return;
+    const m = JSON.parse(fs.readFileSync(src, 'utf8'));
+    fs.writeFileSync(
+      path.join(distDir, 'routes-manifest-deterministic.json'),
+      JSON.stringify(sort(m))
+    );
   } catch (e) {
-    console.warn('[vercel-shim] buildContent error:', e.message);
-    return null;
+    console.warn('[vercel-shim] writeDeterministic error:', e.message);
   }
 }
 
-function writeFile(dir, content) {
-  if (!content) return;
+function backupDir(src, dst) {
   try {
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'routes-manifest-deterministic.json'), content);
-    console.log('[vercel-shim] wrote to', dir);
+    fs.cpSync(src, dst, { recursive: true, force: true, dereference: false });
+    console.log('[vercel-shim] backed up', src, '→', dst);
+    return true;
   } catch (e) {
-    console.warn('[vercel-shim] write error at', dir, ':', e.message);
+    console.warn('[vercel-shim] backup error:', e.message);
+    return false;
   }
 }
 
-function writeEverywhere(distDir, content) {
-  const targets = new Set();
-  targets.add(distDir);
-  targets.add(path.join(process.cwd(), '.next'));
-  // Vercel hardcoded fallback — covers any rootDirectory mismatch.
-  if (process.env.VERCEL || process.env.NOW_BUILDER) {
-    targets.add('/vercel/path0/.next');
-    targets.add('/vercel/path0/web/.next');
-    targets.add('/vercel/output/.next');
+function restoreDir(src, dst) {
+  try {
+    fs.mkdirSync(dst, { recursive: true });
+    fs.cpSync(src, dst, { recursive: true, force: false, dereference: false });
+    console.log('[vercel-shim] restored', src, '→', dst);
+  } catch (e) {
+    console.warn('[vercel-shim] restore error:', e.message);
   }
-  for (const t of targets) writeFile(t, content);
 }
 
 /** @type {import('next').NextAdapter} */
@@ -60,12 +63,14 @@ const adapter = {
 
   async onBuildComplete(ctx) {
     const { distDir } = ctx;
-    console.log('[vercel-shim] onBuildComplete distDir:', distDir, 'cwd:', process.cwd(), 'VERCEL:', !!process.env.VERCEL);
+    console.log('[vercel-shim] onBuildComplete distDir:', distDir, 'cwd:', process.cwd());
 
-    const content = buildContent(distDir);
-    console.log('[vercel-shim] content ready:', !!content);
+    // Make sure the deterministic manifest exists before backup.
+    writeDeterministic(distDir);
 
-    writeEverywhere(distDir, content);
+    // Back up the entire .next directory to a tmp location before Vercel's adapter runs.
+    const backupRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'next-backup-'));
+    const backedUp = backupDir(distDir, backupRoot);
 
     try {
       const vercel = await getVercelAdapter();
@@ -76,7 +81,19 @@ const adapter = {
       console.warn('[vercel-shim] vercel adapter error:', e.message);
     }
 
-    writeEverywhere(distDir, content);
+    // Restore anything Vercel's adapter removed.
+    if (backedUp) {
+      restoreDir(backupRoot, distDir);
+      // Also restore to any other path Vercel CLI might read from.
+      if (process.env.VERCEL || process.env.NOW_BUILDER) {
+        for (const alt of ['/vercel/path0/.next', '/vercel/path0/web/.next']) {
+          if (alt !== distDir) restoreDir(backupRoot, alt);
+        }
+      }
+    }
+
+    // Cleanup backup
+    try { fs.rmSync(backupRoot, { recursive: true, force: true }); } catch {}
   },
 };
 
