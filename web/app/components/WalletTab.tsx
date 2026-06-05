@@ -63,6 +63,26 @@ export default function WalletTab() {
   const [privacyLoading, setPrivacyLoading] = useState(false);
   const [privacyStatus, setPrivacyStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
 
+  // HTLC creation
+  const [htlcTo, setHtlcTo] = useState("");
+  const [htlcSats, setHtlcSats] = useState("");
+  const [htlcPreimage, setHtlcPreimage] = useState("");
+  const [htlcSecretHash, setHtlcSecretHash] = useState("");
+  const [htlcExpiry, setHtlcExpiry] = useState("60");
+  const [htlcLoading, setHtlcLoading] = useState(false);
+  const [htlcStatus, setHtlcStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
+  const [htlcResult, setHtlcResult] = useState<{ id: string; result: Record<string, unknown> } | null>(null);
+
+  // HTLC inbox
+  type HtlcEntry = { paymentHash: string; status: number; amountSats: number; transferId: string; createdTime: unknown };
+  const [htlcIncoming, setHtlcIncoming] = useState<HtlcEntry[]>([]);
+  const [htlcOutgoing, setHtlcOutgoing] = useState<HtlcEntry[]>([]);
+  const [htlcInboxLoading, setHtlcInboxLoading] = useState(false);
+  const [htlcInboxStatus, setHtlcInboxStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
+  const [claimInputs, setClaimInputs] = useState<Record<string, string>>({});
+  const [claimLoading, setClaimLoading] = useState<Record<string, boolean>>({});
+  const [claimStatus, setClaimStatus] = useState<Record<string, { msg: string; type: "" | "ok" | "err" | "info" }>>({});
+
   const [copyMsg, setCopyMsg] = useState("");
   const refreshInFlight = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -277,6 +297,89 @@ export default function WalletTab() {
       setSendStatus({ msg: `Error: ${e instanceof Error ? e.message : String(e)}`, type: "err" });
     } finally {
       setSendLoading(false);
+    }
+  }
+
+  async function loadHtlcInbox() {
+    setHtlcInboxLoading(true);
+    setHtlcInboxStatus({ msg: "", type: "" });
+    try {
+      const data = await api("/api/htlc");
+      setHtlcIncoming(data.incoming ?? []);
+      setHtlcOutgoing(data.outgoing ?? []);
+    } catch (e) {
+      setHtlcInboxStatus({ msg: e instanceof Error ? e.message : String(e), type: "err" });
+    } finally {
+      setHtlcInboxLoading(false);
+    }
+  }
+
+  async function claimHtlc(paymentHash: string) {
+    const preimage = claimInputs[paymentHash]?.trim();
+    if (!preimage) return setClaimStatus(p => ({ ...p, [paymentHash]: { msg: "Enter the preimage.", type: "err" } }));
+    if (!/^[0-9a-fA-F]{64}$/.test(preimage)) return setClaimStatus(p => ({ ...p, [paymentHash]: { msg: "Preimage must be 64 hex chars.", type: "err" } }));
+    setClaimLoading(p => ({ ...p, [paymentHash]: true }));
+    setClaimStatus(p => ({ ...p, [paymentHash]: { msg: "Claiming…", type: "info" } }));
+    try {
+      await api("/api/htlc/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ preimage }) });
+      setClaimStatus(p => ({ ...p, [paymentHash]: { msg: "Claimed! Sats added to balance.", type: "ok" } }));
+      void loadHtlcInbox();
+    } catch (e) {
+      setClaimStatus(p => ({ ...p, [paymentHash]: { msg: e instanceof Error ? e.message : String(e), type: "err" } }));
+    } finally {
+      setClaimLoading(p => ({ ...p, [paymentHash]: false }));
+    }
+  }
+
+  function generatePreimage() {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+    setHtlcPreimage(hex);
+    // SHA-256 via SubtleCrypto
+    void crypto.subtle.digest("SHA-256", bytes).then(buf => {
+      const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+      setHtlcSecretHash(hash);
+    });
+  }
+
+  function onPreimageChange(val: string) {
+    setHtlcPreimage(val);
+    setHtlcSecretHash("");
+    const trimmed = val.trim();
+    if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
+      const bytes = new Uint8Array(trimmed.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+      void crypto.subtle.digest("SHA-256", bytes).then(buf => {
+        const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+        setHtlcSecretHash(hash);
+      });
+    }
+  }
+
+  async function createHtlc() {
+    if (!htlcTo.trim()) return setHtlcStatus({ msg: "Enter a receiver Spark address.", type: "err" });
+    if (!htlcSats || Number(htlcSats) <= 0) return setHtlcStatus({ msg: "Enter a valid amount in sats.", type: "err" });
+    if (htlcPreimage && !/^[0-9a-fA-F]{64}$/.test(htlcPreimage.trim())) return setHtlcStatus({ msg: "Preimage must be 64 hex characters (32 bytes).", type: "err" });
+    setHtlcLoading(true);
+    setHtlcStatus({ msg: "Creating HTLC…", type: "info" });
+    setHtlcResult(null);
+    try {
+      const data = await api("/api/htlc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receiverSparkAddress: htlcTo.trim(),
+          amountSats: Number(htlcSats),
+          preimage: htlcPreimage.trim() || undefined,
+          expiryMinutes: Number(htlcExpiry) || 60,
+        }),
+      });
+      setHtlcResult({ id: data.id, result: data.result });
+      setHtlcStatus({ msg: "HTLC created!", type: "ok" });
+    } catch (e) {
+      setHtlcStatus({ msg: e instanceof Error ? e.message : String(e), type: "err" });
+    } finally {
+      setHtlcLoading(false);
     }
   }
 
@@ -550,6 +653,175 @@ export default function WalletTab() {
           <Status msg={sendStatus.msg} type={(sendStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setSendStatus({ msg: "", type: "" })} />
         </div>
       </div>
+
+      {/* Create HTLC */}
+      {connected && (
+        <div style={{ ...card }}>
+          {sectionTitle("Create HTLC", "Lock sats behind a secret hash")}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <span style={label}>Receiver Spark Address</span>
+              <input
+                type="text" placeholder="sparkrt1p…" value={htlcTo}
+                onChange={e => setHtlcTo(e.target.value)} style={{ ...inp, fontFamily: "JetBrains Mono, monospace", fontSize: 11 }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <span style={label}>Amount (sats)</span>
+              <input
+                type="number" placeholder="e.g. 1000" min={1} value={htlcSats}
+                onChange={e => setHtlcSats(e.target.value)} style={inp}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={label}>Preimage (32 bytes hex)</span>
+                <button
+                  onClick={generatePreimage}
+                  style={{ background: "rgba(240,137,58,0.1)", border: "1px solid rgba(240,137,58,0.25)", borderRadius: 7, padding: "3px 10px", fontSize: 10, fontWeight: 700, color: "var(--orange)", cursor: "pointer", letterSpacing: "0.3px" }}
+                >
+                  Generate Random
+                </button>
+              </div>
+              <input
+                type="text" placeholder="64 hex chars — or leave blank to auto-generate" value={htlcPreimage}
+                onChange={e => onPreimageChange(e.target.value)}
+                style={{ ...inp, fontFamily: "JetBrains Mono, monospace", fontSize: 11 }}
+              />
+            </div>
+
+            {htlcSecretHash && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span style={label}>Secret Hash (SHA-256 of preimage)</span>
+                <div style={{ background: "rgba(45,211,110,0.05)", border: "1px solid rgba(45,211,110,0.15)", borderRadius: 10, padding: "10px 14px", fontFamily: "JetBrains Mono, monospace", fontSize: 11, color: "var(--green)", wordBreak: "break-all", lineHeight: 1.5 }}>
+                  {htlcSecretHash}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <span style={label}>Expiry (minutes from now)</span>
+              <input
+                type="number" placeholder="60" min={1} value={htlcExpiry}
+                onChange={e => setHtlcExpiry(e.target.value)} style={{ ...inp, width: 120 }}
+              />
+            </div>
+
+            <button
+              onClick={createHtlc} disabled={htlcLoading}
+              style={{ background: htlcLoading ? "rgba(240,137,58,0.15)" : "linear-gradient(135deg, #f0893a, #c9680c)", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 700, color: htlcLoading ? "var(--text-faint)" : "#000", cursor: htlcLoading ? "default" : "pointer", width: "100%", boxShadow: htlcLoading ? "none" : "0 3px 12px rgba(240,137,58,0.2)" }}
+            >
+              {htlcLoading ? "Creating HTLC…" : "Create HTLC"}
+            </button>
+
+            <Status msg={htlcStatus.msg} type={(htlcStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setHtlcStatus({ msg: "", type: "" })} />
+
+            {htlcResult && (
+              <div style={{ background: "rgba(45,211,110,0.05)", border: "1px solid rgba(45,211,110,0.2)", borderRadius: 12, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase", color: "var(--green)" }}>HTLC Created</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <span style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: "0.5px" }}>Transfer ID</span>
+                  <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 11, color: "#ccc", wordBreak: "break-all" }}>{htlcResult.id}</span>
+                </div>
+                {htlcPreimage && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <span style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: "0.5px" }}>Preimage (keep secret)</span>
+                    <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 11, color: "#f7931a", wordBreak: "break-all" }}>{htlcPreimage}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* HTLC Inbox */}
+      {connected && (
+        <div style={{ ...card }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            {sectionTitle("HTLC Inbox", "Incoming & sent HTLCs")}
+            <button onClick={loadHtlcInbox} disabled={htlcInboxLoading}
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 600, color: htlcInboxLoading ? "#333" : "#555", cursor: htlcInboxLoading ? "default" : "pointer" }}>
+              {htlcInboxLoading ? "Loading…" : "Refresh"}
+            </button>
+          </div>
+
+          <Status msg={htlcInboxStatus.msg} type={(htlcInboxStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setHtlcInboxStatus({ msg: "", type: "" })} />
+
+          {/* Incoming — claimable */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase", color: "var(--green)", marginBottom: 10 }}>
+              Incoming ({htlcIncoming.length})
+            </div>
+            {htlcIncoming.length === 0 ? (
+              <div style={{ fontSize: 12, color: "#444", padding: "12px 0" }}>No incoming HTLCs. Hit Refresh to check.</div>
+            ) : htlcIncoming.map(h => {
+              const hash = h.paymentHash;
+              const statusLabel = h.status === 0 ? "Waiting" : h.status === 1 ? "Claimed" : "Returned";
+              const statusColor = h.status === 0 ? "var(--orange)" : h.status === 1 ? "var(--green)" : "#888";
+              const cs = claimStatus[hash];
+              return (
+                <div key={hash} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "14px 16px", marginBottom: 8, display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: "#555" }}>Payment Hash</span>
+                      <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 10, color: "#aaa", wordBreak: "break-all" }}>{hash}</span>
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "flex-end", flexShrink: 0 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--green)" }}>{h.amountSats ? `+${Number(h.amountSats).toLocaleString()} sats` : "—"}</span>
+                      <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: `${statusColor}15`, color: statusColor, textTransform: "uppercase", letterSpacing: "0.6px" }}>{statusLabel}</span>
+                    </div>
+                  </div>
+                  {h.status === 0 && (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <input type="text" placeholder="Preimage (64 hex chars)"
+                        value={claimInputs[hash] ?? ""}
+                        onChange={e => setClaimInputs(p => ({ ...p, [hash]: e.target.value }))}
+                        style={{ flex: 1, background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, color: "#e0e0e0", fontSize: 11, padding: "8px 12px", outline: "none", fontFamily: "JetBrains Mono, monospace", minWidth: 0 }}
+                      />
+                      <button onClick={() => claimHtlc(hash)} disabled={claimLoading[hash]}
+                        style={{ background: claimLoading[hash] ? "rgba(45,211,110,0.1)" : "linear-gradient(135deg,#2dd36e,#1aaa52)", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 700, color: claimLoading[hash] ? "#555" : "#fff", cursor: claimLoading[hash] ? "default" : "pointer", whiteSpace: "nowrap", boxShadow: claimLoading[hash] ? "none" : "0 2px 8px rgba(45,211,110,0.2)" }}>
+                        {claimLoading[hash] ? "…" : "Claim"}
+                      </button>
+                    </div>
+                  )}
+                  {cs?.msg && (
+                    <div style={{ fontSize: 11, color: cs.type === "ok" ? "var(--green)" : cs.type === "err" ? "var(--red)" : "#888" }}>{cs.msg}</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Outgoing — status only */}
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase", color: "#555", marginBottom: 10 }}>
+              Sent ({htlcOutgoing.length})
+              <span style={{ fontWeight: 400, fontSize: 9, marginLeft: 8, color: "#444", textTransform: "none", letterSpacing: 0 }}>Expired HTLCs auto-refund — no action needed</span>
+            </div>
+            {htlcOutgoing.length === 0 ? (
+              <div style={{ fontSize: 12, color: "#444", padding: "12px 0" }}>No sent HTLCs. Hit Refresh to check.</div>
+            ) : htlcOutgoing.map(h => {
+              const statusLabel = h.status === 0 ? "Waiting for claim" : h.status === 1 ? "Claimed" : "Returned to you";
+              const statusColor = h.status === 0 ? "var(--orange)" : h.status === 1 ? "var(--green)" : "#888";
+              return (
+                <div key={h.paymentHash} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "14px 16px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+                    <span style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 10, color: "#666", wordBreak: "break-all" }}>{h.paymentHash.slice(0, 24)}…</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: `${statusColor}15`, color: statusColor, textTransform: "uppercase", letterSpacing: "0.6px", alignSelf: "flex-start" }}>{statusLabel}</span>
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: h.status === 2 ? "var(--green)" : "var(--text-muted)", whiteSpace: "nowrap" }}>
+                    {h.status === 2 ? "↩ " : "−"}{h.amountSats ? `${Number(h.amountSats).toLocaleString()} sats` : "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Transaction History */}
       <div style={{ ...card, gap: 0 }}>
