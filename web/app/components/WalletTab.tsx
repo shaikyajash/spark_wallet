@@ -36,6 +36,7 @@ export default function WalletTab() {
   const [connected, setConnected] = useState(false);
   const [address, setAddress] = useState("");
   const [mnemonic, setMnemonic] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
   const [network, setNetwork] = useState("REGTEST");
   const [connectStatus, setConnectStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
   const [connectLoading, setConnectLoading] = useState(false);
@@ -188,14 +189,19 @@ export default function WalletTab() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function connect() {
-    if (!mnemonic.trim()) return setConnectStatus({ msg: "Enter your mnemonic.", type: "err" });
+    const pk = privateKey.trim();
+    const mn = mnemonic.trim();
+    if (!mn && !pk) return setConnectStatus({ msg: "Enter a mnemonic or private key.", type: "err" });
+    if (pk && !/^[0-9a-fA-F]{64}$/.test(pk))
+      return setConnectStatus({ msg: "Private key must be exactly 64 hex characters.", type: "err" });
     setConnectLoading(true);
     setConnectStatus({ msg: "Connecting to Spark network…", type: "info" });
     try {
+      const body = pk ? { privateKey: pk, network } : { mnemonic: mn, network };
       const data = await api("/api/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mnemonic: mnemonic.trim(), network }),
+        body: JSON.stringify(body),
       });
       if (!data?.address) {
         throw new Error("No address received from server");
@@ -246,8 +252,8 @@ export default function WalletTab() {
 
   async function switchNetwork(next: string) {
     if (next === network) return;
-    if (!mnemonic.trim()) {
-      // Mnemonic was cleared (e.g. after a prior disconnect). Force a clean re-auth.
+    if (!mnemonic.trim() && !privateKey.trim()) {
+      // Credentials were cleared (e.g. after a prior disconnect). Force a clean re-auth.
       await disconnect();
       setNetwork(next);
       return;
@@ -258,10 +264,12 @@ export default function WalletTab() {
     setTransfers([]);
     setBalanceStatus({ msg: `Switching to ${next}…`, type: "info" });
     try {
+      const pk = privateKey.trim();
+      const switchBody = pk ? { privateKey: pk, network: next } : { mnemonic: mnemonic.trim(), network: next };
       const data = await api("/api/connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mnemonic: mnemonic.trim(), network: next }),
+        body: JSON.stringify(switchBody),
       });
       setNetwork(next);
       setBalanceStatus({ msg: "", type: "" });
@@ -466,15 +474,33 @@ export default function WalletTab() {
                 </div>
               </div>
 
-              <div style={{ marginBottom: 24 }}>
+              <div style={{ marginBottom: 16 }}>
                 <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Mnemonic Phrase</label>
                 <input type="password" placeholder="Enter your 12-word seed phrase" value={mnemonic}
-                  onChange={(e) => setMnemonic(e.target.value)} onKeyDown={(e) => e.key === "Enter" && connect()}
+                  onChange={(e) => { setMnemonic(e.target.value); if (e.target.value) setPrivateKey(""); }}
+                  onKeyDown={(e) => e.key === "Enter" && connect()}
                   style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: 12, color: "var(--text)", fontSize: 14, padding: "13px 14px", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
                   onFocus={e => (e.currentTarget.style.borderColor = "rgba(240,137,58,0.45)")}
                   onBlur={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
                 />
-                <p style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 6 }}>Your phrase never leaves this device.</p>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                <div style={{ flex: 1, height: 1, background: "var(--border-2)" }} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-faint)", letterSpacing: "0.5px" }}>OR</span>
+                <div style={{ flex: 1, height: 1, background: "var(--border-2)" }} />
+              </div>
+
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Private Key (hex)</label>
+                <input type="password" placeholder="64-char hex private key" value={privateKey}
+                  onChange={(e) => { setPrivateKey(e.target.value); if (e.target.value) setMnemonic(""); }}
+                  onKeyDown={(e) => e.key === "Enter" && connect()}
+                  style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border-2)", borderRadius: 12, color: "var(--text)", fontSize: 14, padding: "13px 14px", outline: "none", fontFamily: "monospace", boxSizing: "border-box" }}
+                  onFocus={e => (e.currentTarget.style.borderColor = "rgba(240,137,58,0.45)")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "var(--border-2)")}
+                />
+                <p style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 6 }}>Your credentials never leave this device.</p>
               </div>
 
               <button onClick={connect} disabled={connectLoading}

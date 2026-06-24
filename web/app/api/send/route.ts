@@ -1,5 +1,5 @@
 import { SparkWallet } from "@buildonspark/spark-sdk";
-import { getSession } from "@/lib/session";
+import { getSession, getWalletSeed } from "@/lib/session";
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     if (!to || !sats) return Response.json({ error: "Missing to or sats" }, { status: 400 });
 
     const { wallet } = await SparkWallet.initialize({
-      mnemonicOrSeed: session.mnemonic,
+      mnemonicOrSeed: getWalletSeed(session),
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
     const result = await wallet.transfer({ receiverSparkAddress: to.trim(), amountSats: Number(sats) });

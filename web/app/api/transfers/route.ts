@@ -1,5 +1,5 @@
 import { SparkWallet } from "@buildonspark/spark-sdk";
-import { getSession } from "@/lib/session";
+import { getSession, getWalletSeed } from "@/lib/session";
 
 export async function GET(req: Request) {
   const session = await getSession();
@@ -7,7 +7,7 @@ export async function GET(req: Request) {
 
   try {
     const { wallet } = await SparkWallet.initialize({
-      mnemonicOrSeed: session.mnemonic,
+      mnemonicOrSeed: getWalletSeed(session),
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
     const { searchParams } = new URL(req.url);

@@ -1,5 +1,5 @@
 import { SparkWallet } from "@buildonspark/spark-sdk";
-import { getSession } from "@/lib/session";
+import { getSession, getWalletSeed } from "@/lib/session";
 
 // PreimageRequestRole enum values from proto (not re-exported by the SDK package)
 const ROLE_RECEIVER = 0;
@@ -22,7 +22,7 @@ export async function GET() {
 
   try {
     const { wallet } = await SparkWallet.initialize({
-      mnemonicOrSeed: session.mnemonic,
+      mnemonicOrSeed: getWalletSeed(session),
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
 
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "Missing receiverSparkAddress or amountSats" }, { status: 400 });
 
     const { wallet } = await SparkWallet.initialize({
-      mnemonicOrSeed: session.mnemonic,
+      mnemonicOrSeed: getWalletSeed(session),
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
 

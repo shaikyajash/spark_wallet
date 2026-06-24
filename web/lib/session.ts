@@ -5,15 +5,22 @@ const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 interface SessionData {
   mnemonic: string;
+  seedType?: "mnemonic" | "privateKey";
   address: string;
   network: string;
   timestamp: number;
 }
 
-export async function setSession(mnemonic: string, address: string, network: string) {
+export function getWalletSeed(session: SessionData): string | Buffer {
+  if (session.seedType === "privateKey") return Buffer.from(session.mnemonic, "hex");
+  return session.mnemonic;
+}
+
+export async function setSession(mnemonic: string, address: string, network: string, seedType: "mnemonic" | "privateKey" = "mnemonic") {
   const cookieStore = await cookies();
   const data: SessionData = {
     mnemonic,
+    seedType,
     address,
     network,
     timestamp: Date.now(),

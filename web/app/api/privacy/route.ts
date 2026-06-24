@@ -1,5 +1,5 @@
 import { SparkWallet } from "@buildonspark/spark-sdk";
-import { getSession } from "@/lib/session";
+import { getSession, getWalletSeed } from "@/lib/session";
 
 type WalletWithPrivacy = {
   getWalletSettings: () => Promise<unknown>;
@@ -12,7 +12,7 @@ export async function GET() {
 
   try {
     const { wallet } = await SparkWallet.initialize({
-      mnemonicOrSeed: session.mnemonic,
+      mnemonicOrSeed: getWalletSeed(session),
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
     const w = wallet as unknown as WalletWithPrivacy;
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "`enabled` boolean required" }, { status: 400 });
     }
     const { wallet } = await SparkWallet.initialize({
-      mnemonicOrSeed: session.mnemonic,
+      mnemonicOrSeed: getWalletSeed(session),
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
     const w = wallet as unknown as WalletWithPrivacy;

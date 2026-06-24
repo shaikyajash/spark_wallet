@@ -1,5 +1,5 @@
 import { SparkWallet } from "@buildonspark/spark-sdk";
-import { getSession } from "@/lib/session";
+import { getSession, getWalletSeed } from "@/lib/session";
 
 const balanceCache = new Map<string, { sats: string; owned: string; incoming: string; timestamp: number }>();
 const CACHE_TTL = 2000; // 2 second cache to smooth out fluctuations
@@ -16,7 +16,7 @@ export async function GET() {
 
   try {
     const { wallet } = await SparkWallet.initialize({
-      mnemonicOrSeed: session.mnemonic,
+      mnemonicOrSeed: getWalletSeed(session),
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
     const { satsBalance } = await wallet.getBalance();
