@@ -6,8 +6,7 @@ export async function GET(req: Request) {
   if (!session) return Response.json({ error: "Not connected" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const invoice    = searchParams.get("invoice")?.trim();
-  const amountSats = searchParams.get("amountSats");
+  const invoice = searchParams.get("invoice")?.trim();
 
   if (!invoice) return Response.json({ error: "Missing invoice" }, { status: 400 });
 
@@ -17,17 +16,9 @@ export async function GET(req: Request) {
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
 
-    const estimate = await wallet.getLightningSendFeeEstimate(
-      invoice,
-      amountSats ? Number(amountSats) : undefined,
-    );
+    const feeSats = await wallet.getLightningSendFeeEstimate({ encodedInvoice: invoice });
 
-    const raw = estimate as unknown as Record<string, unknown> | null;
-    const feeSats = raw
-      ? String(raw.feeSats ?? raw.feeEstimate ?? raw.fee ?? 0)
-      : "0";
-
-    return Response.json({ feeSats });
+    return Response.json({ feeSats: String(feeSats ?? 0) });
   } catch (e: unknown) {
     return Response.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }

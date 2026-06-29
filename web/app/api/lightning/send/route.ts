@@ -14,14 +14,14 @@ export async function POST(req: Request) {
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
 
-    const request = await wallet.requestLightningSend({
-      encodedInvoice: String(invoice).trim(),
-      ...(amountSats ? { amountSats: Number(amountSats) } : {}),
+    const result = await wallet.payLightningInvoice({
+      invoice: String(invoice).trim(),
+      maxFeeSats: 1000,
+      ...(amountSats ? { amountSatsToSend: Number(amountSats) } : {}),
     });
 
-    if (!request) return Response.json({ error: "No response from Spark" }, { status: 500 });
-
-    return Response.json({ id: request.id, status: request.status });
+    const r = result as unknown as Record<string, unknown>;
+    return Response.json({ id: String(r.id ?? ""), status: String(r.status ?? "PENDING") });
   } catch (e: unknown) {
     return Response.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }

@@ -15,12 +15,10 @@ export async function POST(req: Request) {
       options: { network: session.network as "MAINNET" | "REGTEST" | "TESTNET" | "SIGNET" | "LOCAL" },
     });
 
-    const request = await wallet.requestLightningReceive({
+    const request = await wallet.createLightningInvoice({
       amountSats: Number(amountSats),
       ...(memo ? { memo: String(memo) } : {}),
     });
-
-    if (!request) return Response.json({ error: "No response from Spark" }, { status: 500 });
 
     return Response.json({
       id:      request.id,
