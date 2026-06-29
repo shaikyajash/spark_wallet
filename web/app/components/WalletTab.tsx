@@ -60,6 +60,21 @@ export default function WalletTab() {
   const [txHasNext, setTxHasNext] = useState(false);
   const [txStatus, setTxStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
 
+  // Lightning receive
+  const [lnRecvSats, setLnRecvSats] = useState("");
+  const [lnRecvMemo, setLnRecvMemo] = useState("");
+  const [lnRecvInvoice, setLnRecvInvoice] = useState<string | null>(null);
+  const [lnRecvStatus, setLnRecvStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
+  const [lnRecvLoading, setLnRecvLoading] = useState(false);
+
+  // Lightning send
+  const [lnSendInvoice, setLnSendInvoice] = useState("");
+  const [lnSendSats, setLnSendSats] = useState("");
+  const [lnFee, setLnFee] = useState<string | null>(null);
+  const [lnSendStatus, setLnSendStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
+  const [lnSendLoading, setLnSendLoading] = useState(false);
+  const [lnFeeLoading, setLnFeeLoading] = useState(false);
+
   const [privacyEnabled, setPrivacyEnabled] = useState<boolean | null>(null);
   const [privacyLoading, setPrivacyLoading] = useState(false);
   const [privacyStatus, setPrivacyStatus] = useState({ msg: "", type: "" as "" | "ok" | "err" | "info" });
@@ -517,6 +532,68 @@ export default function WalletTab() {
     );
   }
 
+  async function lnReceive() {
+    if (!lnRecvSats || Number(lnRecvSats) <= 0)
+      return setLnRecvStatus({ msg: "Enter a positive amount in sats.", type: "err" });
+    setLnRecvLoading(true);
+    setLnRecvStatus({ msg: "Creating invoice…", type: "info" });
+    setLnRecvInvoice(null);
+    try {
+      const data = await api("/api/lightning/receive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountSats: Number(lnRecvSats), ...(lnRecvMemo ? { memo: lnRecvMemo } : {}) }),
+      });
+      setLnRecvInvoice(data.invoice);
+      setLnRecvStatus({ msg: `Invoice created (${data.id.slice(0, 12)}…)`, type: "ok" });
+    } catch (e: unknown) {
+      setLnRecvStatus({ msg: `Error: ${e instanceof Error ? e.message : String(e)}`, type: "err" });
+    } finally {
+      setLnRecvLoading(false);
+    }
+  }
+
+  async function lnEstimateFee() {
+    if (!lnSendInvoice.trim()) return setLnSendStatus({ msg: "Paste a bolt11 invoice first.", type: "err" });
+    setLnFeeLoading(true);
+    setLnFee(null);
+    try {
+      const params = new URLSearchParams({ invoice: lnSendInvoice.trim() });
+      if (lnSendSats) params.set("amountSats", lnSendSats);
+      const data = await api(`/api/lightning/fee?${params}`);
+      setLnFee(data.feeSats);
+      setLnSendStatus({ msg: "", type: "" });
+    } catch (e: unknown) {
+      setLnSendStatus({ msg: `Error: ${e instanceof Error ? e.message : String(e)}`, type: "err" });
+    } finally {
+      setLnFeeLoading(false);
+    }
+  }
+
+  async function lnSend() {
+    if (!lnSendInvoice.trim()) return setLnSendStatus({ msg: "Paste a bolt11 invoice.", type: "err" });
+    setLnSendLoading(true);
+    setLnSendStatus({ msg: "Sending Lightning payment…", type: "info" });
+    try {
+      const body: Record<string, unknown> = { invoice: lnSendInvoice.trim() };
+      if (lnSendSats) body.amountSats = Number(lnSendSats);
+      const data = await api("/api/lightning/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      setLnSendStatus({ msg: `Paid! Status: ${data.status} (${data.id.slice(0, 12)}…)`, type: "ok" });
+      setLnSendInvoice("");
+      setLnSendSats("");
+      setLnFee(null);
+      await refreshBalance();
+    } catch (e: unknown) {
+      setLnSendStatus({ msg: `Error: ${e instanceof Error ? e.message : String(e)}`, type: "err" });
+    } finally {
+      setLnSendLoading(false);
+    }
+  }
+
   async function disconnect() {
     if (timerRef.current) clearInterval(timerRef.current);
     await fetch("/api/disconnect", { method: "POST" }).catch(() => {});
@@ -677,6 +754,82 @@ export default function WalletTab() {
             {sendLoading ? "Sending…" : "Send"}
           </button>
           <Status msg={sendStatus.msg} type={(sendStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setSendStatus({ msg: "", type: "" })} />
+        </div>
+      </div>
+
+      {/* Lightning */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20, marginBottom: 20 }}>
+
+        {/* Lightning Receive */}
+        <div style={card}>
+          {sectionTitle("Lightning Receive", "Invoice")}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={label}>Amount (sats)</span>
+            <input type="number" placeholder="e.g. 5000" min={1} value={lnRecvSats}
+              onChange={e => setLnRecvSats(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && lnReceive()}
+              style={inp} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={label}>Memo (optional)</span>
+            <input type="text" placeholder="e.g. Payment for coffee" value={lnRecvMemo}
+              onChange={e => setLnRecvMemo(e.target.value)} style={inp} />
+          </div>
+          <button onClick={lnReceive} disabled={lnRecvLoading}
+            style={{ background: lnRecvLoading ? "rgba(240,137,58,0.2)" : "linear-gradient(135deg, #f0893a, #c9680c)", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 700, color: lnRecvLoading ? "var(--text-faint)" : "#fff", cursor: "pointer", width: "100%", boxShadow: lnRecvLoading ? "none" : "0 3px 12px rgba(240,137,58,0.2)" }}
+          >
+            {lnRecvLoading ? "Generating…" : "Generate Invoice"}
+          </button>
+          {lnRecvInvoice && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div
+                onClick={() => { navigator.clipboard.writeText(lnRecvInvoice!).then(() => setLnRecvStatus({ msg: "Invoice copied!", type: "ok" })); }}
+                title="Click to copy"
+                style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 14px", fontSize: 10, wordBreak: "break-all", color: "var(--text-muted)", cursor: "pointer", fontFamily: "JetBrains Mono, monospace", lineHeight: 1.6, transition: "all 0.15s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "var(--orange-border)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border)"; }}
+              >
+                {lnRecvInvoice}
+              </div>
+              <button onClick={() => navigator.clipboard.writeText(lnRecvInvoice!).then(() => setLnRecvStatus({ msg: "Invoice copied!", type: "ok" }))}
+                style={{ background: "var(--surface-3)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", cursor: "pointer", width: "100%" }}>
+                Copy Invoice
+              </button>
+            </div>
+          )}
+          <Status msg={lnRecvStatus.msg} type={(lnRecvStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setLnRecvStatus({ msg: "", type: "" })} />
+        </div>
+
+        {/* Lightning Send */}
+        <div style={card}>
+          {sectionTitle("Lightning Send", "Pay Invoice")}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={label}>Bolt11 Invoice</span>
+            <textarea placeholder="lnbc…" value={lnSendInvoice}
+              onChange={e => { setLnSendInvoice(e.target.value); setLnFee(null); }}
+              style={{ ...inp, fontFamily: "JetBrains Mono, monospace", fontSize: 10, resize: "vertical", minHeight: 80, lineHeight: 1.5 }} />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={label}>Amount (sats — only for zero-amount invoices)</span>
+            <input type="number" placeholder="Leave blank if invoice has amount" min={1} value={lnSendSats}
+              onChange={e => { setLnSendSats(e.target.value); setLnFee(null); }} style={inp} />
+          </div>
+          {lnFee !== null && (
+            <div style={{ background: "rgba(240,137,58,0.06)", border: "1px solid var(--orange-border)", borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "var(--orange)" }}>
+              Estimated fee: {Number(lnFee).toLocaleString()} sats
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={lnEstimateFee} disabled={lnFeeLoading}
+              style={{ flex: "0 0 auto", background: "var(--surface-3)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 16px", fontSize: 12, fontWeight: 600, color: lnFeeLoading ? "var(--text-faint)" : "var(--text-muted)", cursor: "pointer" }}>
+              {lnFeeLoading ? "…" : "Estimate Fee"}
+            </button>
+            <button onClick={lnSend} disabled={lnSendLoading}
+              style={{ flex: 1, background: lnSendLoading ? "rgba(45,211,110,0.15)" : "linear-gradient(135deg, #2dd36e, #1aaa52)", border: "none", borderRadius: 10, padding: "12px", fontSize: 13, fontWeight: 700, color: lnSendLoading ? "var(--text-faint)" : "#fff", cursor: "pointer", boxShadow: lnSendLoading ? "none" : "0 3px 12px rgba(45,211,110,0.2)" }}>
+              {lnSendLoading ? "Paying…" : "Pay Invoice"}
+            </button>
+          </div>
+          <Status msg={lnSendStatus.msg} type={(lnSendStatus.type || "info") as "ok" | "err" | "info"} onDismiss={() => setLnSendStatus({ msg: "", type: "" })} />
         </div>
       </div>
 
